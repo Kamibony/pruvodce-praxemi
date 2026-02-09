@@ -1,6 +1,8 @@
 <script setup>
-import { ref, onMounted, defineProps } from 'vue';
+import { ref, onMounted, defineProps, computed } from 'vue';
 import StudentService from '../services/StudentService';
+import PracticeService from '../services/PracticeService';
+import AiChatWidget from './AiChatWidget.vue';
 
 const props = defineProps({
   user: {
@@ -15,19 +17,54 @@ const faq = ref([]);
 const loading = ref(true);
 const error = ref(null);
 
+const logs = ref([]);
+const logForm = ref({ date: new Date().toISOString().slice(0, 10), activity: '', hours: 1 });
+const submittingLog = ref(false);
+
+const totalHours = computed(() => PracticeService.calculateTotalHours(logs.value));
+const goalHours = 15;
+const progressPercentage = computed(() => Math.min((totalHours.value / goalHours) * 100, 100));
+
 const openFaqIndex = ref(null);
 
 const toggleFaq = (index) => {
   openFaqIndex.value = openFaqIndex.value === index ? null : index;
 };
 
+const handleAddLog = async () => {
+  if (!logForm.value.activity || logForm.value.hours <= 0) return;
+
+  try {
+    submittingLog.value = true;
+    await PracticeService.addLog(props.user.id, logForm.value);
+    // Refresh logs
+    logs.value = await PracticeService.getLogs(props.user.id);
+    // Reset form
+    logForm.value.activity = '';
+    logForm.value.hours = 1;
+  } catch (e) {
+    console.error(e);
+    alert("Chyba při ukládání: " + e.message);
+  } finally {
+    submittingLog.value = false;
+  }
+};
+
 onMounted(async () => {
   try {
     loading.value = true;
-    const data = await StudentService.getDashboardData(props.user.id);
-    school.value = data.school;
-    team.value = data.team;
-    faq.value = data.faq;
+
+    // Parallel fetch for better performance
+    const [dashboardData, fetchedLogs] = await Promise.all([
+      StudentService.getDashboardData(props.user.id),
+      PracticeService.getLogs(props.user.id)
+    ]);
+
+    school.value = dashboardData.school;
+    team.value = dashboardData.team;
+    faq.value = dashboardData.faq;
+    logs.value = fetchedLogs;
+
   } catch (err) {
     console.error(err);
     error.value = "Nepodařilo se načíst data.";
@@ -38,7 +75,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 flex flex-col font-sans">
+  <div class="min-h-screen bg-gray-50 flex flex-col font-sans relative">
     <!-- Header -->
     <header class="bg-blue-600 text-white shadow-md">
       <div class="container mx-auto px-4 py-4 flex justify-between items-center">
@@ -65,6 +102,96 @@ onMounted(async () => {
           <h2 class="text-3xl font-bold text-gray-800">Ahoj, {{ user.name.split(' ')[0] }}!</h2>
           <p class="text-gray-600 mt-2 text-lg">Vítej ve své aplikaci pro správu praxe.</p>
         </div>
+
+        <!-- Practice Log Section -->
+        <section class="bg-white rounded-xl shadow-md p-6 border-t-4 border-purple-600 transition hover:shadow-lg mb-8">
+          <h3 class="text-xl font-semibold text-gray-800 mb-6 flex items-center">
+            <span class="bg-purple-100 text-purple-600 p-2 rounded-full mr-3">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </span>
+            Deník praxe
+          </h3>
+
+          <!-- Progress Bar -->
+          <div class="mb-8">
+            <div class="flex justify-between items-end mb-2">
+              <span class="text-sm font-medium text-gray-700">Celkový pokrok</span>
+              <span class="text-sm font-bold text-purple-700">{{ totalHours }} / {{ goalHours }} h</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+              <div
+                class="bg-purple-600 h-4 rounded-full transition-all duration-500 ease-out"
+                :style="{ width: `${progressPercentage}%` }"
+              ></div>
+            </div>
+            <p v-if="totalHours < goalHours" class="text-xs text-gray-500 mt-1 text-right">Zbývá ještě {{ goalHours - totalHours }} h</p>
+            <p v-else class="text-xs text-green-600 mt-1 text-right font-bold">Gratulujeme! Praxe splněna.</p>
+          </div>
+
+          <!-- Add Log Form -->
+          <div class="bg-gray-50 p-5 rounded-lg border border-gray-200 mb-6">
+            <h4 class="font-bold text-gray-700 mb-3 text-sm uppercase tracking-wide">Nový záznam</h4>
+            <form @submit.prevent="handleAddLog" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+              <div class="md:col-span-3">
+                <label class="block text-xs font-medium text-gray-500 mb-1">Datum</label>
+                <input v-model="logForm.date" type="date" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm px-3 py-2 border">
+              </div>
+              <div class="md:col-span-6">
+                <label class="block text-xs font-medium text-gray-500 mb-1">Aktivita</label>
+                <input v-model="logForm.activity" type="text" required placeholder="Popis činnosti..." class="w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm px-3 py-2 border">
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-xs font-medium text-gray-500 mb-1">Hodiny</label>
+                <input v-model.number="logForm.hours" type="number" step="0.5" min="0.5" max="12" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm px-3 py-2 border">
+              </div>
+              <div class="md:col-span-1">
+                <button
+                  type="submit"
+                  :disabled="submittingLog"
+                  class="w-full bg-purple-600 text-white p-2 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 transition-colors flex justify-center items-center h-[38px]"
+                >
+                  <svg v-if="!submittingLog" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                  </svg>
+                  <span v-else class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Logs List -->
+          <div class="overflow-hidden rounded-lg border border-gray-200">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Datum</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aktivita</th>
+                  <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Hodiny</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr v-for="log in logs" :key="log.id" class="hover:bg-gray-50 transition-colors">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {{ new Date(log.date).toLocaleDateString('cs-CZ') }}
+                  </td>
+                  <td class="px-6 py-4 text-sm text-gray-900">
+                    {{ log.activity }}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right font-medium">
+                    {{ log.hours }} h
+                  </td>
+                </tr>
+                <tr v-if="logs.length === 0">
+                  <td colspan="3" class="px-6 py-8 text-center text-sm text-gray-500 italic">
+                    Zatím žádné záznamy.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
 
         <!-- My School Card -->
         <section class="bg-white rounded-xl shadow-md overflow-hidden border-t-4 border-blue-600 transition hover:shadow-lg mb-8">
@@ -185,5 +312,9 @@ onMounted(async () => {
         </div>
       </div>
     </footer>
+
+    <!-- AI Widget -->
+    <AiChatWidget />
+
   </div>
 </template>
