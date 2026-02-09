@@ -71,6 +71,98 @@ Zápočet:
 Přístup studentky/studenta k povinnostem vyplývajících z náplně reflexe pedagogické praxe, kvalitou jejího plnění se na závěr praxe hodnotí zápočtem. Studentku/studenta hodnotí akademický pracovník IVP s přihlédnutím ke kvalitě předložených materiálů. Na základě těchto materiálů a diskuze, ve kterých studentka/student prokáže dobrou orientaci v didaktické problematice.
 
 ========================================
+DOKUMENT 3: DOTAZNÍK A - KVALITA PEDAGOGICKÉHO PŮSOBENÍ (UPV)
+========================================
+DOTAZNÍK A
+Vyjádření ke kvalitě pedagogického působení studenta IVP ČZU v rámci řízené pedagogické praxe.
+
+Sledovaná kritéria a bodové hodnocení (škála 1-6, kde 1=min, 6=max):
+
+1. Působení posluchače na žáky
+- Vztah k žákům
+- Schopnost udržet si kázeň při vyučování
+- Snaha o aktivizaci žáků během vyučování
+- Udržení pozornosti a zájmu žáků
+- Podpora samostatného myšlení žáků
+- Podněcování k samostudiu
+
+2. Odborná erudice posluchače
+- Připravenost na výuku
+- Znalost učiva
+- Zkušenosti z odborné praxe
+- Uvádění příkladů z odborné praxe
+
+3. Didaktická transformace učiva
+- Kvalita přípravy na vyučování
+- Dovednost vytyčit výchovně vzdělávací cíl
+- Dovednost strukturovat učivo
+- Dovednost hodnotit výkon žáka
+- Adekvátnost využití technických a materiálních didaktických prostředků
+- Časová koordinace a dodržení času
+
+4. Komunikativní dovednosti
+- Kvalita jazykového projevu (spisovnost, čistota řeči, terminologie)
+- Hlasový projev (intenzita, intonace, tempo)
+- Neverbální komunikace (gestikulace, mimika, pohyb)
+
+5. Celkový vzhled a vystupování posluchače
+- Vhodnost oblečení
+- Celkový dojem
+
+========================================
+DOKUMENT 4: HOSPITAČNÍ ZÁZNAM UČITELE (UPV)
+========================================
+HOSPITAČNÍ ZÁZNAM VÝKONU UČITELE NA PEDAGOGICKÉ PRAXI
+
+Základní údaje:
+Zaznamenává se: Škola, Jméno učitele, Třída, Datum, Počet žáků, Předmět, Téma, Cíl, Pomůcky, Metody.
+
+Hodnocená kritéria (Bodovací škála: 0=ne, 1=spíše ne, 2=spíše ano, 3=ano):
+1. Cíle formuloval žákům jasně a srozumitelně.
+2. Vyučování účelně zorganizoval.
+3. Využil obsah v souladu se vzdělávacím programem.
+4. Zpřístupnil obsah žákům účelně a správně.
+5. Používal adekvátní metody.
+6. Využíval mezipředmětové souvislosti.
+7. Materiální prostředky včas připravil a účelně využil.
+8. Dokázal žáky motivovat.
+9. Komunikoval s žáky jasně a srozumitelně.
+10. Vytvořil příznivé klima třídy.
+11. Respektoval individualitu žáků.
+12. Hodnotil žáky věcně a objektivně.
+13. Splnil cíl vyučovací hodiny.
+14. Dokázal provést sebereflexi.
+
+========================================
+DOKUMENT 5: PODKLAD PRO CVIČNÉ UČITELE - ROZBOR VYUČOVACÍ JEDNOTKY (UPV)
+========================================
+Podklad pro cvičné učitele – rozbor teoretické a praktické vyučovací jednotky.
+
+Klíčové otázky pro rozbor (ANO/NE/ČÁSTEČNĚ + Poznámka):
+
+1. Úvod a Cíle:
+- Sdělil/a na začátku student/ka žákům strukturu vyučovací jednotky?
+- Formuloval/a vhodně student/ka vzdělávací cíle? (Využíval/a aktivní slovesa: zapamatování, porozumění, aplikace, analýza, syntéza, hodnocení?)
+- Vyplynuly z průběhu vyučovací jednotky výchovné cíle? (např. BOZP, komunikace, efektivní jednání)
+
+2. Obsah a Metody:
+- Byl obsah vyučovací jednotky věcně správný?
+- Byla vyučovací jednotka přiměřená věkové skupině a schopnostem žáků?
+- Byly jednotlivé části vyučovací jednotky logicky uspořádány?
+- Byla dodržena struktura vyučovací jednotky? (úvod, expozice, fixace, závěr / instruktáž, práce žáků, hodnocení)
+- Použil/a student/ka vhodné metody? (výklad, rozhovor, instruktáž, samostatná práce)
+
+3. Prostředky a Motivace:
+- Využil/a student/ka adekvátní materiální prostředky? (prezentace, nástroje, dataprojektor)
+- Aplikoval/a student/ka mezipředmětové vztahy a průřezová témata? (Občan, Životní prostředí, ICT)
+- Motivoval/a student/ka vhodně žáky v průběhu vyučovací jednotky?
+
+4. Řízení a Závěr:
+- Obcházel/a a kontroloval/a student/ka po instruktáži žáky při jejich samostatné práci?
+- Vymezil/a student/ka na závěr čas nutný pro úklid pracoviště?
+- Zhodnotil/a student/ka v závěru průběh vyučovací jednotky a splnění cílů?
+
+========================================
 
 PRAVIDLA PRO ODPOVĚĎ:
 1. Odpovídej POUZE na základě výše uvedeného textu. Pokud tam odpověď není, napiš přesně: "Omlouvám se, ale tuto informaci ve směrnicích nevidím. Kontaktujte prosím garanta praxe (JUDr. Vadovičová)."
