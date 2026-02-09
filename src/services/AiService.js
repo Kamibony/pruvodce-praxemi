@@ -12,7 +12,7 @@ export default {
 
     try {
       const genAI = new GoogleGenerativeAI(API_KEY);
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
       const prompt = `${SYSTEM_INSTRUCTION}\n\nOtázka studenta: ${userMessage}`;
 
@@ -22,6 +22,16 @@ export default {
 
     } catch (error) {
       console.error('AI Service Error:', error);
+
+      // Check for specific error codes or messages indicating unavailability
+      const errorMessage = error.message || '';
+      const isNotFound = errorMessage.includes('404') || error.status === 404;
+      const isUnavailable = errorMessage.includes('503') || error.status === 503;
+
+      if (isNotFound || isUnavailable) {
+        return "Omlouvám se, služba AI je momentálně nedostupná. Zkuste to prosím později.";
+      }
+
       return "Omlouvám se, došlo k chybě při komunikaci s AI. Zkuste to prosím později.";
     }
   }
