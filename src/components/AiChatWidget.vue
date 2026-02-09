@@ -1,5 +1,6 @@
 <script setup>
 import { ref, nextTick, watch } from 'vue';
+import AiService from '../services/AiService';
 
 const isOpen = ref(false);
 const messages = ref([
@@ -26,29 +27,40 @@ const scrollToBottom = async () => {
 const sendMessage = async () => {
   if (!newMessage.value.trim()) return;
 
+  const textToSend = newMessage.value;
+
   // Add user message
   messages.value.push({
     id: Date.now(),
-    text: newMessage.value,
+    text: textToSend,
     isUser: true
   });
 
   newMessage.value = "";
   scrollToBottom();
 
-  // Simulate AI thinking
+  // Show loading state
   isTyping.value = true;
 
-  // Mock Response Logic
-  setTimeout(() => {
-    isTyping.value = false;
+  try {
+    const response = await AiService.sendMessage(textToSend);
+
     messages.value.push({
       id: Date.now() + 1,
-      text: "To je zajímavá otázka! Jako AI Sensei se stále učím, ale brzy ti budu umět odpovědět lépe. Zatím si zapiš svou praxi do deníku.",
+      text: response,
       isUser: false
     });
+  } catch (error) {
+    console.error(error);
+    messages.value.push({
+      id: Date.now() + 1,
+      text: "Omlouvám se, došlo k neočekávané chybě.",
+      isUser: false
+    });
+  } finally {
+    isTyping.value = false;
     scrollToBottom();
-  }, 1500);
+  }
 };
 </script>
 
@@ -91,10 +103,13 @@ const sendMessage = async () => {
 
           <!-- Typing Indicator -->
           <div v-if="isTyping" class="flex justify-start">
-            <div class="bg-white border border-gray-100 rounded-2xl rounded-bl-none px-4 py-3 shadow-sm flex space-x-1 items-center">
-              <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0s"></div>
-              <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
-              <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
+            <div class="bg-white border border-gray-100 rounded-2xl rounded-bl-none px-4 py-3 shadow-sm flex space-x-2 items-center text-gray-500 text-sm">
+              <span>Jules píše...</span>
+              <div class="flex space-x-1">
+                <div class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0s"></div>
+                <div class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                <div class="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
+              </div>
             </div>
           </div>
         </div>
