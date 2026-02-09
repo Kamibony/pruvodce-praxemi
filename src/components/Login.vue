@@ -23,7 +23,7 @@ const handleSubmit = () => {
             id="code"
             v-model="code"
             type="text"
-            placeholder="např. SVAR1"
+            placeholder="např. 242324"
             class="shadow-sm appearance-none border rounded w-full py-3 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
           />
         </div>
