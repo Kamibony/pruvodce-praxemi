@@ -1,47 +1,28 @@
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { SYSTEM_INSTRUCTION } from '../data/knowledgeBase.js';
 
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
 
 export default {
   async sendMessage(userMessage) {
     if (!API_KEY) {
-      console.error('Gemini API key is missing.');
-      return "Omlouvám se, ale momentálně nejsem k dispozici.";
+      console.error('Gemini API Key is missing.');
+      return "Omlouvám se, ale momentálně nejsem k dispozici (chybí klíč).";
     }
 
-    const payload = {
-      contents: [{
-        parts: [{ text: SYSTEM_INSTRUCTION + "\n\nUser Question: " + userMessage }]
-      }]
-    };
-
     try {
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      });
+      const genAI = new GoogleGenerativeAI(API_KEY);
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status} ${response.statusText}`);
-      }
+      const prompt = `${SYSTEM_INSTRUCTION}\n\nOtázka studenta: ${userMessage}`;
 
-      const data = await response.json();
-
-      // Parse the response structure of Gemini API
-      if (data.candidates && data.candidates.length > 0 && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts.length > 0) {
-        return data.candidates[0].content.parts[0].text;
-      } else {
-         console.error('Unexpected API response structure:', data);
-         return "Omlouvám se, ale momentálně nejsem k dispozici.";
-      }
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      return response.text();
 
     } catch (error) {
-      console.error('Error calling Gemini API:', error);
-      return "Omlouvám se, ale momentálně nejsem k dispozici.";
+      console.error('AI Service Error:', error);
+      return "Omlouvám se, došlo k chybě při komunikaci s AI. Zkuste to prosím později.";
     }
   }
 };
