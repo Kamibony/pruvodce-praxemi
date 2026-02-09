@@ -1,77 +1,399 @@
 {
   "students": [
-    { "id": "242324", "name": "Kristýna Švarcová", "schoolId": "horovice", "week": "1.-4. týždeň" },
-    { "id": "242323", "name": "Michal Švarc", "schoolId": "horovice", "week": "1.-4. týždeň" },
-    { "id": "242294", "name": "Klára Fulmeková", "schoolId": "horovice", "week": "1.-4. týždeň" },
-    { "id": "242282", "name": "Marek Zámostný", "schoolId": "auto_skola", "week": "1.-4. týždeň" },
-    { "id": "246984", "name": "Lenka Pfeiferová", "schoolId": "jezdectvi", "week": "1.-4. týždeň" },
-    { "id": "242312", "name": "Kristýna Nováková", "schoolId": "jezdectvi", "week": "1.-4. týždeň" },
-    { "id": "246985", "name": "Barbara Stjepanovičová", "schoolId": "jezdectvi", "week": "1.-4. týždeň" },
-    { "id": "242306", "name": "Jan Krejčí", "schoolId": "vos_umelecka", "week": "1.-4. týždeň" },
-    { "id": "242325", "name": "Šárka Turynská", "schoolId": "vos_umelecka", "week": "1.-4. týždeň" },
-    { "id": "237691", "name": "Pavlína Veselá Štochlová", "schoolId": "vos_umelecka", "week": "1.-4. týždeň" },
-    { "id": "242297", "name": "Jan Hlavatý", "schoolId": "vos_umelecka", "week": "1.-4. týždeň" },
-    { "id": "242290", "name": "Natálie Černá", "schoolId": "vos_umelecka", "week": "1.-4. týždeň" },
-    { "id": "242326", "name": "František Touš", "schoolId": "gastro_krbu", "week": "1.-4. týždeň" },
-    { "id": "242322", "name": "Petr Šimeček", "schoolId": "gastro_krbu", "week": "1.-4. týždeň" },
-    { "id": "242310", "name": "Lucie Možiová", "schoolId": "gastro_krbu", "week": "1.-4. týždeň" },
-    { "id": "242301", "name": "Irena Kaňková", "schoolId": "gastro_krbu", "week": "1.-4. týždeň" },
-    { "id": "242309", "name": "Jana Macháčková", "schoolId": "klanovice", "week": "1.-4. týždeň" },
-    { "id": "242299", "name": "Amálie Jeřábková", "schoolId": "klanovice", "week": "1.-4. týždeň" },
-    { "id": "242308", "name": "Eva Mórová", "schoolId": "klanovice", "week": "1.-4. týždeň" },
-    { "id": "242298", "name": "Kamila Chlebná, DiS.", "schoolId": "alsovo", "week": "1.-4. týždeň" },
-    { "id": "246337", "name": "Veronika Kaňková, Dis.", "schoolId": "alsovo", "week": "1.-4. týždeň" },
-    { "id": "242307", "name": "Pavel Kučera", "schoolId": "jarov", "week": "1.-4. týždeň" },
-    { "id": "242292", "name": "Ondřej Drtina", "schoolId": "jarov", "week": "1.-4. týždeň" },
-    { "id": "242293", "name": "Marek Farkaš", "schoolId": "jarov", "week": "1.-4. týždeň" },
-    { "id": "245037", "name": "Martin Janda", "schoolId": "jarov", "week": "1.-4. týždeň" },
-    { "id": "242318", "name": "Sára Přibylová", "schoolId": "jarov", "week": "1.-4. týždeň" },
-    { "id": "242327", "name": "Veronika Veselá", "schoolId": "gym_praha9", "week": "1.-4. týždeň" },
-    { "id": "233216", "name": "Ondřej Jelínek", "schoolId": "gym_praha9", "week": "1.-4. týždeň" },
-    { "id": "242330", "name": "Ivana Zýková", "schoolId": "gym_praha9", "week": "1.-4. týždeň" },
-    { "id": "242288", "name": "Helena Cinegrová", "schoolId": "gym_praha9", "week": "1.-4. týždeň" },
-    { "id": "242321", "name": "David Štrunc", "schoolId": "gym_praha9", "week": "1.-4. týždeň" },
-    { "id": "242287", "name": "Denisa Cibulková", "schoolId": "gym_praha9", "week": "1.-4. týždeň" },
-    { "id": "242304", "name": "Nikola Kozlová", "schoolId": "gym_praha9", "week": "1.-4. týždeň" },
-    { "id": "242295", "name": "Alena Hájek Borlová", "schoolId": "gym_praha9", "week": "1.-4. týždeň" },
-    { "id": "242313", "name": "Nikol Ondráčková", "schoolId": "gym_praha9", "week": "1.-4. týždeň" },
-    { "id": "242328", "name": "Veronika Vaňková", "schoolId": "zemedelska", "week": "1.-4. týždeň" },
-    { "id": "242296", "name": "Simon Hönig", "schoolId": "zemedelska", "week": "1.-4. týždeň" },
-    { "id": "245038", "name": "Nikola Melničáková", "schoolId": "zemedelska", "week": "1.-4. týždeň" },
-    { "id": "243339", "name": "Natálie Kapalínová", "schoolId": "cakovice", "week": "1.-4. týždeň" },
-    { "id": "242302", "name": "David Kec", "schoolId": "radotin", "week": "1.-4. týždeň" },
-    { "id": "245035", "name": "Josef Černý", "schoolId": "radotin", "week": "1.-4. týždeň" },
-    { "id": "242285", "name": "David Bašus", "schoolId": "radotin", "week": "1.-4. týždeň" },
-    { "id": "242317", "name": "Vladimír Preksl", "schoolId": "radotin", "week": "1.-4. týždeň" },
-    { "id": "242329", "name": "Jiří Úlovec", "schoolId": "klatovy", "week": "1.-4. týždeň" },
-    { "id": "237198", "name": "Pavla Kučerová", "schoolId": "podnikani_gastro", "week": "1.-4. týždeň" },
-    { "id": "242305", "name": "Karolína Křížková", "schoolId": "podnikani_gastro", "week": "1.-4. týždeň" },
-    { "id": "213837", "name": "Ing. Jakub Bednář", "schoolId": "podnikani_gastro", "week": "1.-4. týždeň" },
-    { "id": "242320", "name": "Dita Šimůnková", "schoolId": "jilove", "week": "1.-4. týždeň" },
-    { "id": "242319", "name": "Ing. Jiřina Špálová", "schoolId": "jilove", "week": "1.-4. týždeň" },
-    { "id": "246983", "name": "Romana Židlíková", "schoolId": "jilove", "week": "1.-4. týždeň" }
+    {
+      "id": "242324",
+      "name": "Kristýna Švarcová",
+      "schoolId": "horovice",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "242323",
+      "name": "Michal Švarc",
+      "schoolId": "horovice",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "242294",
+      "name": "Klára Fulmeková",
+      "schoolId": "horovice",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "242282",
+      "name": "Marek Zámostný",
+      "schoolId": "auto_skola",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "246984",
+      "name": "Lenka Pfeiferová",
+      "schoolId": "jezdectvi",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "246466",
+      "name": "Kristýna Nováková",
+      "schoolId": "jezdectvi",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "246985",
+      "name": "Barbara Stjepanovičová",
+      "schoolId": "jezdectvi",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "242306",
+      "name": "Jan Krejčí",
+      "schoolId": "vos_umelecka",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "242325",
+      "name": "Šárka Turynská",
+      "schoolId": "vos_umelecka",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "237691",
+      "name": "Pavlína Veselá Štochlová",
+      "schoolId": "vos_umelecka",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "242297",
+      "name": "Jan Hlavatý",
+      "schoolId": "vos_umelecka",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "242290",
+      "name": "Natálie Černá",
+      "schoolId": "vos_umelecka",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "242326",
+      "name": "František Touš",
+      "schoolId": "gastro_krbu",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "242322",
+      "name": "Petr Šimeček",
+      "schoolId": "gastro_krbu",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "242316",
+      "name": "Lucie Možiová",
+      "schoolId": "gastro_krbu",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "242301",
+      "name": "Irena Kaňková",
+      "schoolId": "gastro_krbu",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "242309",
+      "name": "Jana Macháčková",
+      "schoolId": "klanovice",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "242299",
+      "name": "Amálie Jeřábková",
+      "schoolId": "klanovice",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "242308",
+      "name": "Eva Mórová",
+      "schoolId": "klanovice",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "242298",
+      "name": "Kamila Chlebná, DiS.",
+      "schoolId": "alsovo",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "246337",
+      "name": "Veronika Kaňková, Dis.",
+      "schoolId": "alsovo",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "242307",
+      "name": "Pavel Kučera",
+      "schoolId": "jarov",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "242292",
+      "name": "Ondřej Drtina",
+      "schoolId": "jarov",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "242293",
+      "name": "Marek Farkaš",
+      "schoolId": "jarov",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "245037",
+      "name": "Martin Janda",
+      "schoolId": "jarov",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "242318",
+      "name": "Sára Přibylová",
+      "schoolId": "jarov",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "242327",
+      "name": "Veronika Veselá",
+      "schoolId": "gym_praha9",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "233216",
+      "name": "Ondřej Jelínek",
+      "schoolId": "gym_praha9",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "242330",
+      "name": "Ivana Zýková",
+      "schoolId": "gym_praha9",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "242288",
+      "name": "Helena Cinegrová",
+      "schoolId": "gym_praha9",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "242321",
+      "name": "David Štrunc",
+      "schoolId": "gym_praha9",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "242287",
+      "name": "Denisa Cibulková",
+      "schoolId": "gym_praha9",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "242304",
+      "name": "Nikola Kozlová",
+      "schoolId": "gym_praha9",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "242295",
+      "name": "Alena Hájek Borlová",
+      "schoolId": "gym_praha9",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "242313",
+      "name": "Nikol Ondráčková",
+      "schoolId": "gym_praha9",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "242328",
+      "name": "Veronika Vaňková",
+      "schoolId": "zemedelska",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "242296",
+      "name": "Simon Hönig",
+      "schoolId": "zemedelska",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "245038",
+      "name": "Nikola Melničáková",
+      "schoolId": "zemedelska",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "243339",
+      "name": "Natálie Kapalínová",
+      "schoolId": "cakovice",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "242302",
+      "name": "David Kec",
+      "schoolId": "radotin",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "245035",
+      "name": "Josef Černý",
+      "schoolId": "radotin",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "242285",
+      "name": "David Bašus",
+      "schoolId": "radotin",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "242317",
+      "name": "Vladimír Preksl",
+      "schoolId": "radotin",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "242329",
+      "name": "Jiří Úlovec",
+      "schoolId": "klatovy",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "237198",
+      "name": "Pavla Kučerová",
+      "schoolId": "podnikani_gastro",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "242305",
+      "name": "Karolína Křížková",
+      "schoolId": "podnikani_gastro",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "213837",
+      "name": "Ing. Jakub Bednář",
+      "schoolId": "podnikani_gastro",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "242320",
+      "name": "Dita Šimůnková",
+      "schoolId": "jilove",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "242319",
+      "name": "Ing. Jiřina Špálová",
+      "schoolId": "jilove",
+      "week": "1.-4. týden"
+    },
+    {
+      "id": "246983",
+      "name": "Romana Židlíková",
+      "schoolId": "jilove",
+      "week": "1.-4. týden"
+    }
   ],
   "schools": {
-    "horovice": { "name": "SOŠ a SOU Hořovice", "focus": "pedagogické lyceum", "coord": "Ředitel: Ing. Vladimír Kebert, CSc., tel.: +420 731 582 691" },
-    "auto_skola": { "name": "Střední škola automobilní", "focus": "automechanik", "coord": "Kontaktujte sekretariát SŠ automobilní" },
-    "jezdectvi": { "name": "SOŠ a SOU (jezdectví)", "focus": "chovatelství", "coord": "Ředitelka: Ing. Soňa Froňková, Ph.D., tel. 257 941 094" },
-    "vos_umelecka": { "name": "VOŠ umělecká a řemeslná", "focus": "právo a diplomacie", "coord": "Ředitelka Dr. Jana Porvichová, tel. 724 884 143" },
-    "gastro_krbu": { "name": "SŠ Gastronomie U KRBU", "focus": "gastronomie", "coord": "Zástupkyně: ing. Věra Pavlíková, tel. 274 019 103" },
-    "klanovice": { "name": "Klánovice - Hotelová škola", "focus": "hotelnictví", "coord": "Sekretariát Hotelové školy Klánovice" },
-    "alsovo": { "name": "VOŠ, SOŠ A G, Alšovo nábřeží 6", "focus": "dentální hygiena", "coord": "Zástupkyně pro odborné předměty: Alšovo nábřeží" },
-    "jarov": { "name": "Střední odborná škola Jarov", "focus": "truhlář", "coord": "Ing. Bc. Gabriela Kotrčová, tel. 266 106 275" },
-    "gym_praha9": { "name": "Gymnázium a SOŠ, Praha 9", "focus": "kadeřník", "coord": "Lukáš Kovalský, Tel. 737 283 491" },
-    "zemedelska": { "name": "Střední zemědělská škola", "focus": "veřejná správa", "coord": "Jitka Gregorová, tel. 313 251 013" },
-    "cakovice": { "name": "SOU Čakovice", "focus": "chovatel zvířat", "coord": "Sekretariát SOU Čakovice" },
-    "radotin": { "name": "SOU Praha - Radotín", "focus": "automechanik", "coord": "Sekretariát SOU Radotín" },
-    "klatovy": { "name": "SŠZ a P Klatovy", "focus": "zahradník", "coord": "SŠZ a P Klatovy" },
-    "podnikani_gastro": { "name": "SŠ podnikání a gastronomie", "focus": "cukrář", "coord": "PhDr. Bc. Štěpničková Olga, tel. 281 028 907" },
-    "jilove": { "name": "SŠ Jílové u Prahy", "focus": "cukrář/podnikání", "coord": "Ředitel: Mgr. Radek Coufal, tel. 736 622 550" }
+    "horovice": {
+      "name": "SOŠ a SOU Hořovice",
+      "focus": "pedagogické lyceum",
+      "coord": "Ředitel: Ing. Vladimír Kebert, CSc., tel.: +420 731 582 691"
+    },
+    "auto_skola": {
+      "name": "Střední škola automobilní",
+      "focus": "automechanik",
+      "coord": "Kontaktujte sekretariát SŠ automobilní"
+    },
+    "jezdectvi": {
+      "name": "SOŠ a SOU (jezdectví)",
+      "focus": "chovatelství",
+      "coord": "Ředitelka: Ing. Soňa Froňková, Ph.D., tel. 257 941 094"
+    },
+    "vos_umelecka": {
+      "name": "VOŠ umělecká a řemeslná",
+      "focus": "právo a diplomacie",
+      "coord": "Ředitelka Dr. Jana Porvichová, tel. 724 884 143"
+    },
+    "gastro_krbu": {
+      "name": "SŠ Gastronomie U KRBU",
+      "focus": "gastronomie",
+      "coord": "Zástupkyně: ing. Věra Pavlíková, tel. 274 019 103"
+    },
+    "klanovice": {
+      "name": "Klánovice - Hotelová škola",
+      "focus": "hotelnictví",
+      "coord": "Sekretariát Hotelové školy Klánovice"
+    },
+    "alsovo": {
+      "name": "VOŠ, SOŠ A G, Alšovo nábřeží 6",
+      "focus": "dentální hygiena",
+      "coord": "Zástupkyně pro odborné předměty: Alšovo nábřeží"
+    },
+    "jarov": {
+      "name": "Střední odborná škola Jarov",
+      "focus": "truhlář",
+      "coord": "Ing. Bc. Gabriela Kotrčová, tel. 266 106 275"
+    },
+    "gym_praha9": {
+      "name": "Gymnázium a SOŠ, Praha 9",
+      "focus": "kadeřník",
+      "coord": "Lukáš Kovalský, Tel. 737 283 491"
+    },
+    "zemedelska": {
+      "name": "Střední zemědělská škola",
+      "focus": "veřejná správa",
+      "coord": "Jitka Gregorová, tel. 313 251 013"
+    },
+    "cakovice": {
+      "name": "SOU Čakovice",
+      "focus": "chovatel zvířat",
+      "coord": "Sekretariát SOU Čakovice"
+    },
+    "radotin": {
+      "name": "SOU Praha - Radotín",
+      "focus": "automechanik",
+      "coord": "Sekretariát SOU Radotín"
+    },
+    "klatovy": {
+      "name": "SŠZ a P Klatovy",
+      "focus": "zahradník",
+      "coord": "SŠZ a P Klatovy"
+    },
+    "podnikani_gastro": {
+      "name": "SŠ podnikání a gastronomie",
+      "focus": "cukrář",
+      "coord": "PhDr. Bc. Štěpničková Olga, tel. 281 028 907"
+    },
+    "jilove": {
+      "name": "SŠ Jílové u Prahy",
+      "focus": "cukrář/podnikání",
+      "coord": "Ředitel: Mgr. Radek Coufal, tel. 736 622 550"
+    }
   },
   "faq": [
-    { "q": "Mám zkrácenou praxi, když neučím?", "a": "Ne. Rozsah je stanovený metodikou (napr. 12 týždňov pre UPV). Prax je povinná bez ohľadu na vaše zamestnanie." },
-    { "q": "Je to 15 dní alebo 15 hodín?", "a": "Nezamieňať. 15 hodín sú spravidla 'výstupy' (učíte vy), ale na škole musíte byť prítomní podľa dohody s cvičným učiteľom, zvyčajne viac dní." },
-    { "q": "Kdy mám kontaktovať školu?", "a": "Najneskôr 14 dní pred nástupom na prax. Kontaktné údaje vidíte na svojej nástenke." },
-    { "q": "Čo ak nestíham/som chorý?", "a": "Okamžite kontaktujte cvičného učiteľa na škole a garanta praxe (JUDr. Vadovičová). Absenciu je nutné nahradiť." }
+    {
+      "q": "Mám zkrácenou praxi, když neučím?",
+      "a": "Ne. Rozsah je stanoven metodikou (např. 12 týdnů pro UPV). Praxe je povinná bez ohledu na vaše zaměstnání."
+    },
+    {
+      "q": "Je to 15 dní nebo 15 hodin?",
+      "a": "Nezaměňovat. 15 hodin jsou zpravidla 'výstupy' (učíte vy), ale ve škole musíte být přítomni podle dohody s cvičným učitelem, obvykle více dní."
+    },
+    {
+      "q": "Kdy mám kontaktovat školu?",
+      "a": "Nejpozději 14 dní před nástupem na praxi. Kontaktní údaje vidíte na své nástěnce."
+    },
+    {
+      "q": "Co když nestíhám/jsem nemocný?",
+      "a": "Okamžitě kontaktujte cvičného učitele na škole a garanta praxe (JUDr. Vadovičová). Absenci je nutné nahradit."
+    }
   ]
 }
