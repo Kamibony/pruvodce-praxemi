@@ -25,6 +25,11 @@ const totalHours = computed(() => PracticeService.calculateTotalHours(logs.value
 const goalHours = 15;
 const progressPercentage = computed(() => Math.min((totalHours.value / goalHours) * 100, 100));
 
+const displayName = computed(() => {
+  if (!props.user || !props.user.name) return 'Studente';
+  return props.user.name.split(' ').find(part => !part.includes('.')) || props.user.name;
+});
+
 const openFaqIndex = ref(null);
 
 const toggleFaq = (index) => {
@@ -99,7 +104,7 @@ onMounted(async () => {
       <div v-else>
         <!-- Greeting -->
         <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-8">
-          <h2 class="text-3xl font-bold text-gray-800">Ahoj, {{ user.name.split(' ')[0] }}!</h2>
+          <h2 class="text-3xl font-bold text-gray-800">Ahoj, {{ displayName }}!</h2>
           <p class="text-gray-600 mt-2 text-lg">Vítej ve své aplikaci pro správu praxe.</p>
         </div>
 

@@ -35,7 +35,7 @@ const handleSubmit = async () => {
       <h2 class="text-2xl font-bold mb-6 text-center text-blue-600">Průvodce praxemi</h2>
       <form @submit.prevent="handleSubmit">
         <div class="mb-6">
-          <label for="code" class="block text-gray-700 text-sm font-bold mb-2">Váš kód</label>
+          <label for="code" class="block text-gray-700 text-sm font-bold mb-2">Zadejte své ID studenta (stejné jako do UIS)</label>
           <input
             id="code"
             v-model="code"
@@ -55,7 +55,6 @@ const handleSubmit = async () => {
           <span v-else>Vstoupit</span>
         </button>
       </form>
-      <p class="text-center text-gray-400 text-xs mt-6">Zadejte kód, který jste obdrželi od garanta.</p>
     </div>
   </div>
 </template>
