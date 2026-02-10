@@ -69,64 +69,354 @@ const faq = [
 ]
 
 const students = [
-  { "id": "242285", "name": "David Bašus", "schoolId": "radotin", "week": "1.-4. týden" },
-  { "id": "213837", "name": "Ing. Jakub Bednář", "schoolId": "podnikani_gastro", "week": "1.-4. týden" },
-  { "id": "242287", "name": "Denisa Cibulková", "schoolId": "gym_praha9", "week": "1.-4. týden" },
-  { "id": "242288", "name": "Helena Cinegrová", "schoolId": "gym_praha9", "week": "1.-4. týden" },
-  { "id": "242290", "name": "Natálie Černá", "schoolId": "vos_umelecka", "week": "1.-4. týden" },
-  { "id": "242291", "name": "Josef Černý", "schoolId": "radotin", "week": "1.-4. týden" },
-  { "id": "242292", "name": "Ondřej Drtina", "schoolId": "jarov", "week": "1.-4. týden" },
-  { "id": "242293", "name": "Marek Farkaš", "schoolId": "jarov", "week": "1.-4. týden" },
-  { "id": "244083", "name": "Eva Fischerová", "schoolId": "nezarazeno", "week": "1.-4. týden" },
-  { "id": "242294", "name": "Klára Fulmeková", "schoolId": "horovice", "week": "1.-4. týden" },
-  { "id": "242286", "name": "Alena Hájek Borlová", "schoolId": "gym_praha9", "week": "1.-4. týden" },
-  { "id": "60630", "name": "Jan Hlavatý", "schoolId": "vos_umelecka", "week": "1.-4. týden" },
-  { "id": "242296", "name": "Simon Hönig", "schoolId": "zemedelska", "week": "1.-4. týden" },
-  { "id": "210067", "name": "Kamila Chlebná, DiS.", "schoolId": "alsovo", "week": "1.-4. týden" },
-  { "id": "244087", "name": "Marta Chorobíková", "schoolId": "nezarazeno", "week": "1.-4. týden" },
-  { "id": "242299", "name": "Martin Janda", "schoolId": "jarov", "week": "1.-4. týden" },
-  { "id": "226063", "name": "Petr Jehlička", "schoolId": "nezarazeno", "week": "1.-4. týden" },
-  { "id": "242301", "name": "Ondřej Jelínek", "schoolId": "gym_praha9", "week": "1.-4. týden" },
-  { "id": "242302", "name": "Amálie Jeřábková", "schoolId": "klanovice", "week": "1.-4. týden" },
-  { "id": "242303", "name": "Irena Kaňková", "schoolId": "gastro_krbu", "week": "1.-4. týden" },
-  { "id": "210068", "name": "Veronika Kaňková, Dis.", "schoolId": "alsovo", "week": "1.-4. týden" },
-  { "id": "234616", "name": "Natálie Kapalínová", "schoolId": "cakovice", "week": "1.-4. týden" },
-  { "id": "247146", "name": "David Kec", "schoolId": "radotin", "week": "1.-4. týden" },
-  { "id": "247716", "name": "Vít Kinský", "schoolId": "nezarazeno", "week": "1.-4. týden" },
-  { "id": "242306", "name": "Nikola Kozlová", "schoolId": "gym_praha9", "week": "1.-4. týden" },
-  { "id": "242307", "name": "Jan Krejčí", "schoolId": "vos_umelecka", "week": "1.-4. týden" },
-  { "id": "242308", "name": "Karolína Křížková", "schoolId": "podnikani_gastro", "week": "1.-4. týden" },
-  { "id": "242309", "name": "Pavel Kučera", "schoolId": "jarov", "week": "1.-4. týden" },
-  { "id": "242310", "name": "Pavla Kučerová", "schoolId": "podnikani_gastro", "week": "1.-4. týden" },
-  { "id": "242312", "name": "Jana Macháčková", "schoolId": "klanovice", "week": "1.-4. týden" },
-  { "id": "242313", "name": "Machulka Pavel, DiS.", "schoolId": "nezarazeno", "week": "1.-4. týden" },
-  { "id": "242314", "name": "Nikola Melničáková", "schoolId": "zemedelska", "week": "1.-4. týden" },
-  { "id": "242315", "name": "Eva Mórová", "schoolId": "klanovice", "week": "1.-4. týden" },
-  { "id": "242316", "name": "Lucie Možiová", "schoolId": "gastro_krbu", "week": "1.-4. týden" },
-  { "id": "246466", "name": "Kristýna Nováková", "schoolId": "jezdectvi", "week": "1.-4. týden" },
-  { "id": "210069", "name": "Nikol Ondráčková", "schoolId": "gym_praha9", "week": "1.-4. týden" },
-  { "id": "246984", "name": "Lenka Pfeiferová", "schoolId": "jezdectvi", "week": "1.-4. týden" },
-  { "id": "211394", "name": "Vít Pochobradský", "schoolId": "nezarazeno", "week": "1.-4. týden" },
-  { "id": "210070", "name": "Vladimír Preksl", "schoolId": "radotin", "week": "1.-4. týden" },
-  { "id": "242317", "name": "Sára Přibylová", "schoolId": "jarov", "week": "1.-4. týden" },
-  { "id": "249299", "name": "Barbara Stjepanovičová", "schoolId": "jezdectvi", "week": "1.-4. týden" },
-  { "id": "242321", "name": "Petr Šimeček", "schoolId": "gastro_krbu", "week": "1.-4. týden" },
-  { "id": "242322", "name": "Dita Šimůnková", "schoolId": "jilove", "week": "1.-4. týden" },
-  { "id": "100202", "name": "Ing. Jiřina Špálová", "schoolId": "jilove", "week": "1.-4. týden" },
-  { "id": "210065", "name": "David Štrunc", "schoolId": "gym_praha9", "week": "1.-4. týden" },
-  { "id": "242323", "name": "Michal Švarc", "schoolId": "horovice", "week": "1.-4. týden" },
-  { "id": "242324", "name": "Kristýna Švarcová", "schoolId": "horovice", "week": "1.-4. týden" },
-  { "id": "210066", "name": "František Touš", "schoolId": "gastro_krbu", "week": "1.-4. týden" },
-  { "id": "242279", "name": "Šárka Turynská", "schoolId": "vos_umelecka", "week": "1.-4. týden" },
-  { "id": "249472", "name": "Jiří Úlovec", "schoolId": "klatovy", "week": "1.-4. týden" },
-  { "id": "242280", "name": "Veronika Vaňková", "schoolId": "zemedelska", "week": "1.-4. týden" },
-  { "id": "157852", "name": "Pavlína Veselá Štochlová", "schoolId": "vos_umelecka", "week": "1.-4. týden" },
-  { "id": "242281", "name": "Veronika Veselá", "schoolId": "gym_praha9", "week": "1.-4. týden" },
-  { "id": "222132", "name": "Michaela Vycpálková", "schoolId": "nezarazeno", "week": "1.-4. týden" },
-  { "id": "242282", "name": "Marek Zámostný", "schoolId": "auto_skola", "week": "1.-4. týden" },
-  { "id": "242283", "name": "Ivana Zýková", "schoolId": "gym_praha9", "week": "1.-4. týden" },
-  { "id": "242284", "name": "Romana Židlíková", "schoolId": "jilove", "week": "1.-4. týden" },
-  { "id": "999999", "name": "JUDr. Aneta Vadovičová", "schoolId": "gym_praha9", "week": "1.-4. týden" }
+  {
+    "id": "242285",
+    "name": "Bašus David",
+    "schoolId": "radotin",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "213837",
+    "name": "Bednář Jakub, Ing.",
+    "schoolId": "podnikani_gastro",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "242287",
+    "name": "Cibulková Denisa",
+    "schoolId": "gym_praha9",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "242288",
+    "name": "Cinegrová Helena",
+    "schoolId": "gym_praha9",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "242290",
+    "name": "Černá Natálie",
+    "schoolId": "vos_umelecka",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "242291",
+    "name": "Černý Josef",
+    "schoolId": "radotin",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "242292",
+    "name": "Drtina Ondřej",
+    "schoolId": "jarov",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "242293",
+    "name": "Farkaš Marek",
+    "schoolId": "jarov",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "244083",
+    "name": "Fischerová Eva",
+    "schoolId": "nezarazeno",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "242294",
+    "name": "Fulmeková Klára",
+    "schoolId": "horovice",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "242286",
+    "name": "Hájek Borlová Alena",
+    "schoolId": "gym_praha9",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "60630",
+    "name": "Hlavatý Jan",
+    "schoolId": "vos_umelecka",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "242296",
+    "name": "Hönig Simon",
+    "schoolId": "zemedelska",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "210067",
+    "name": "Chlebná Kamila, DiS.",
+    "schoolId": "alsovo",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "244087",
+    "name": "Chorobíková Marta",
+    "schoolId": "nezarazeno",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "242299",
+    "name": "Janda Martin",
+    "schoolId": "jarov",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "226063",
+    "name": "Jehlička Petr",
+    "schoolId": "nezarazeno",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "242301",
+    "name": "Jelínek Ondřej",
+    "schoolId": "gym_praha9",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "242302",
+    "name": "Jeřábková Amálie",
+    "schoolId": "klanovice",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "242303",
+    "name": "Kaňková Irena",
+    "schoolId": "gastro_krbu",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "210068",
+    "name": "Kaňková Veronika, DiS.",
+    "schoolId": "alsovo",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "234616",
+    "name": "Kapalínová Natalia",
+    "schoolId": "cakovice",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "247146",
+    "name": "Kec David",
+    "schoolId": "radotin",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "247716",
+    "name": "Kinský Vít",
+    "schoolId": "nezarazeno",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "242306",
+    "name": "Kozlová Nikola",
+    "schoolId": "gym_praha9",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "242307",
+    "name": "Krejčí Jan",
+    "schoolId": "vos_umelecka",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "242308",
+    "name": "Křížková Karolína",
+    "schoolId": "podnikani_gastro",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "242309",
+    "name": "Kučera Pavel",
+    "schoolId": "jarov",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "242310",
+    "name": "Kučerová Pavla",
+    "schoolId": "podnikani_gastro",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "242312",
+    "name": "Macháčková Jana",
+    "schoolId": "klanovice",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "242313",
+    "name": "Machulka Pavel, DiS.",
+    "schoolId": "nezarazeno",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "242314",
+    "name": "Melničáková Nikola",
+    "schoolId": "zemedelska",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "242315",
+    "name": "Mórová Eva",
+    "schoolId": "klanovice",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "242316",
+    "name": "Možiová Lucie",
+    "schoolId": "gastro_krbu",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "246466",
+    "name": "Nováková Kristýna",
+    "schoolId": "jezdectvi",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "210069",
+    "name": "Ondráčková Nikol",
+    "schoolId": "gym_praha9",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "246984",
+    "name": "Pfeiferová Lenka",
+    "schoolId": "jezdectvi",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "211394",
+    "name": "Pochobradský Vít",
+    "schoolId": "nezarazeno",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "210070",
+    "name": "Preksl Vladimír",
+    "schoolId": "radotin",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "242317",
+    "name": "Přibylová Sára",
+    "schoolId": "jarov",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "249299",
+    "name": "Stjepanovićová Barbara",
+    "schoolId": "jezdectvi",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "242321",
+    "name": "Šimeček Petr",
+    "schoolId": "gastro_krbu",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "242322",
+    "name": "Šimůnková Dita, DiS.",
+    "schoolId": "jilove",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "100202",
+    "name": "Špálová Jiřina, Ing.",
+    "schoolId": "jilove",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "210065",
+    "name": "Štrunc David",
+    "schoolId": "gym_praha9",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "242323",
+    "name": "Švarc Michal",
+    "schoolId": "horovice",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "242324",
+    "name": "Švarcová Kristýna",
+    "schoolId": "horovice",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "210066",
+    "name": "Touš František",
+    "schoolId": "gastro_krbu",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "242279",
+    "name": "Turynská Šárka",
+    "schoolId": "vos_umelecka",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "249472",
+    "name": "Úlovec Jiří",
+    "schoolId": "klatovy",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "242280",
+    "name": "Vaňková Veronika",
+    "schoolId": "zemedelska",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "157852",
+    "name": "Veselá Štochlová Pavlína, Ing.",
+    "schoolId": "vos_umelecka",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "242281",
+    "name": "Veselá Veronika",
+    "schoolId": "gym_praha9",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "222132",
+    "name": "Vycpálková Michaela",
+    "schoolId": "nezarazeno",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "242282",
+    "name": "Zámostný Marek",
+    "schoolId": "auto_skola",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "242283",
+    "name": "Zýková Ivana",
+    "schoolId": "gym_praha9",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "242284",
+    "name": "Židlíková Romana",
+    "schoolId": "jilove",
+    "week": "1.-4. týden"
+  },
+  {
+    "id": "999999",
+    "name": "JUDr. Aneta Vadovičová",
+    "schoolId": "gym_praha9",
+    "week": "1.-4. týden"
+  }
 ]
 
 async function runMigration() {
