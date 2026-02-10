@@ -313,7 +313,7 @@ onMounted(async () => {
           vadovicova@ivp.czu.cz
         </a>
         <div class="mt-8 text-sm text-gray-600 border-t border-gray-800 pt-6">
-          &copy; 2023 Průvodce praxemi pro univerzitní studenty.
+          &copy; 2026 Průvodce praxemi pro univerzitní studenty.
         </div>
       </div>
     </footer>
