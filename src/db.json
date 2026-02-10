@@ -299,6 +299,12 @@
       "name": "Romana Židlíková",
       "schoolId": "jilove",
       "week": "1.-4. týden"
+    },
+    {
+      "id": "999999",
+      "name": "Testovací Uživatel",
+      "schoolId": "horovice",
+      "week": "1.-4. týden"
     }
   ],
   "schools": {

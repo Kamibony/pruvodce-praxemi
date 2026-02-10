@@ -164,6 +164,40 @@ const importData = async () => {
       console.error("UPV 3.xlsx not found! Make sure it is in the root directory.");
     }
 
+    // 4. Seed Manual Students from db.json
+    if (fs.existsSync(DB_JSON_PATH)) {
+      console.log("Processing manual students from db.json...");
+      const dbJson = JSON.parse(fs.readFileSync(DB_JSON_PATH, "utf8"));
+
+      if (dbJson.students) {
+        const batch = writeBatch(db);
+        let count = 0;
+
+        for (const student of dbJson.students) {
+          if (!student.id) continue;
+
+          const studentRef = doc(db, "students", student.id);
+          const studentData = {
+            name: student.name,
+            week: localizeString(student.week),
+            schoolId: student.schoolId
+          };
+
+          batch.set(studentRef, studentData, { merge: true });
+          count++;
+        }
+
+        if (count > 0) {
+          try {
+            await batch.commit();
+            console.log(`Imported ${count} manual students (including test users).`);
+          } catch (e) {
+            console.error("Failed to upload manual students:", e.message);
+          }
+        }
+      }
+    }
+
     console.log("Migration finished.");
     process.exit(0);
 
