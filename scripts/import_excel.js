@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, setDoc, writeBatch } from "firebase/firestore";
-import * as XLSX from "xlsx";
+import XLSX from "xlsx";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
