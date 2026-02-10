@@ -1,7 +1,9 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, setDoc, writeBatch } from "firebase/firestore";
-import XLSX from "xlsx";
 import fs from "fs";
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const XLSX = require("xlsx");
 import path from "path";
 import { fileURLToPath } from "url";
 
