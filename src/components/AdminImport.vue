@@ -10,7 +10,7 @@
         <div class="bg-blue-50 p-4 rounded text-sm">
           <strong>Pripravené na upload:</strong>
           <ul class="list-disc ml-5">
-            <li>57 študentov (IDs z Excelu, mená vo formáte Meno Priezvisko)</li>
+            <li>{{ students.length }} študentov (IDs z Excelu, mená vo formáte Meno Priezvisko)</li>
             <li>15 škôl</li>
             <li>FAQ (Čeština)</li>
           </ul>
@@ -125,7 +125,8 @@ const students = [
   { "id": "222132", "name": "Michaela Vycpálková", "schoolId": "nezarazeno", "week": "1.-4. týden" },
   { "id": "242282", "name": "Marek Zámostný", "schoolId": "auto_skola", "week": "1.-4. týden" },
   { "id": "242283", "name": "Ivana Zýková", "schoolId": "gym_praha9", "week": "1.-4. týden" },
-  { "id": "242284", "name": "Romana Židlíková", "schoolId": "jilove", "week": "1.-4. týden" }
+  { "id": "242284", "name": "Romana Židlíková", "schoolId": "jilove", "week": "1.-4. týden" },
+  { "id": "999999", "name": "JUDr. Aneta Vadovičová", "schoolId": "gym_praha9", "week": "1.-4. týden" }
 ]
 
 async function runMigration() {
