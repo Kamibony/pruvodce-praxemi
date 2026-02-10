@@ -4,6 +4,24 @@ import PracticeService from './PracticeService';
 
 class AdminService {
   /**
+   * Fetches all schools.
+   * @returns {Promise<Object>} Map of school IDs to names.
+   */
+  async getSchools() {
+    try {
+      const schoolsSnap = await getDocs(collection(db, 'schools'));
+      const schoolsMap = {};
+      schoolsSnap.forEach(doc => {
+        schoolsMap[doc.id] = doc.data().name;
+      });
+      return schoolsMap;
+    } catch (error) {
+      console.error("Error fetching schools:", error);
+      throw error;
+    }
+  }
+
+  /**
    * Fetches all students and calculates their total practice hours.
    * optimize: fetches schools once, and fetches logs in parallel.
    * @returns {Promise<Array>} List of students with stats.
@@ -11,16 +29,10 @@ class AdminService {
   async getAllStudentsWithStats() {
     try {
       // 1. Fetch Students and Schools in parallel
-      const [studentsSnap, schoolsSnap] = await Promise.all([
+      const [studentsSnap, schoolsMap] = await Promise.all([
         getDocs(collection(db, 'students')),
-        getDocs(collection(db, 'schools'))
+        this.getSchools()
       ]);
-
-      // 2. Map Schools for quick lookup
-      const schoolsMap = {};
-      schoolsSnap.forEach(doc => {
-        schoolsMap[doc.id] = doc.data().name;
-      });
 
       // 3. Process each student
       const studentPromises = studentsSnap.docs.map(async (docSnap) => {

@@ -390,7 +390,7 @@ const students = [
   {
     "id": "222132",
     "name": "Vycpálková Michaela",
-    "schoolId": "nezarazeno",
+    "schoolId": "zemedelska",
     "week": "1.-4. týden"
   },
   {
