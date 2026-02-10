@@ -27,7 +27,20 @@ const progressPercentage = computed(() => Math.min((totalHours.value / goalHours
 
 const displayName = computed(() => {
   if (!props.user || !props.user.name) return 'Studente';
-  return props.user.name.split(' ').find(part => !part.includes('.')) || props.user.name;
+  const parts = props.user.name.split(' ');
+
+  // 1. Look for name ending with comma (common in Excel with titles at end)
+  const partWithComma = parts.find(p => p.endsWith(','));
+  if (partWithComma) return partWithComma.slice(0, -1);
+
+  // 2. If starts with title (has dot), take 2nd word (e.g. JUDr. Aneta ...)
+  if (parts[0].includes('.') && parts.length > 1) return parts[1];
+
+  // 3. Assume "Surname Name" (Excel default), take 2nd word
+  if (parts.length > 1) return parts[1];
+
+  // 4. Fallback
+  return parts[0];
 });
 
 const openFaqIndex = ref(null);
