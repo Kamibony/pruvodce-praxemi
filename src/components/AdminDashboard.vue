@@ -1,15 +1,33 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import AdminService from '../services/AdminService';
 
 const students = ref([]);
+const schools = ref({});
 const loading = ref(true);
 const error = ref(null);
+
+const orphanedStudents = computed(() => {
+  return students.value.filter(student => {
+    // Check if schoolId exists and is NOT in the schools map
+    // We assume empty string means 'really no school assigned' and is valid?
+    // Or maybe empty string is also an error?
+    // The prompt says "students whose schoolId does not exist in the schools object".
+    // If schoolId is "nezarazeno", it is not empty, and not in schools.
+    if (!student.schoolId) return false;
+    return !schools.value.hasOwnProperty(student.schoolId);
+  });
+});
 
 onMounted(async () => {
   try {
     loading.value = true;
-    students.value = await AdminService.getAllStudentsWithStats();
+    const [studentsData, schoolsData] = await Promise.all([
+      AdminService.getAllStudentsWithStats(),
+      AdminService.getSchools()
+    ]);
+    students.value = studentsData;
+    schools.value = schoolsData;
   } catch (e) {
     console.error(e);
     error.value = "Nepodařilo se načíst data.";
@@ -49,7 +67,29 @@ const getRowClass = (student) => {
         <span class="block sm:inline">{{ error }}</span>
       </div>
 
-      <div v-else class="bg-white rounded-lg shadow overflow-hidden border border-gray-200">
+      <div v-else class="space-y-6">
+        <!-- Health Check Warning -->
+        <div v-if="orphanedStudents.length > 0" class="bg-red-50 border-l-4 border-red-500 p-4 rounded shadow-sm">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <div class="ml-3">
+              <h3 class="text-sm font-medium text-red-800">Kontrola integrity dat</h3>
+              <div class="mt-2 text-sm text-red-700">
+                <ul class="list-disc pl-5 space-y-1">
+                  <li v-for="student in orphanedStudents" :key="student.id">
+                    Chyba: Student <strong>{{ student.name }}</strong> má neznámou školu [{{ student.schoolId }}].
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow overflow-hidden border border-gray-200">
         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
           <h2 class="text-lg font-semibold text-gray-800">Přehled studentů</h2>
           <span class="text-sm text-gray-500">Celkem studentů: {{ students.length }}</span>
@@ -97,6 +137,7 @@ const getRowClass = (student) => {
               </tr>
             </tbody>
           </table>
+        </div>
         </div>
       </div>
     </main>
