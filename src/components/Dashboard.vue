@@ -22,8 +22,14 @@ const logForm = ref({ date: new Date().toISOString().slice(0, 10), activity: '',
 const submittingLog = ref(false);
 
 const totalHours = computed(() => PracticeService.calculateTotalHours(logs.value));
-const goalHours = 15;
-const progressPercentage = computed(() => Math.min((totalHours.value / goalHours) * 100, 100));
+const goalHours = computed(() => {
+  // Check for shortened practice indicators in the week string
+  if (props.user.week && (props.user.week.includes('1.-2.') || props.user.week.includes('zkrácená'))) {
+    return 9;
+  }
+  return 15;
+});
+const progressPercentage = computed(() => Math.min((totalHours.value / goalHours.value) * 100, 100));
 
 const displayName = computed(() => {
   if (!props.user || !props.user.name) return 'Studente';
