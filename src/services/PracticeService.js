@@ -71,6 +71,53 @@ class PracticeService {
     if (!Array.isArray(logs)) return 0;
     return logs.reduce((total, log) => total + (Number(log.hours) || 0), 0);
   }
+
+  /**
+   * Adds a new microteaching evaluation for a student.
+   * @param {string} studentId - The ID of the student.
+   * @param {object} evaluationData - The evaluation data.
+   * @returns {Promise<string>} The ID of the created evaluation.
+   */
+  async addMicroteaching(studentId, evaluationData) {
+    if (!studentId) throw new Error("Student ID is required");
+
+    try {
+      const evaluationsRef = collection(db, 'students', studentId, 'microteachings');
+
+      const docRef = await addDoc(evaluationsRef, {
+        ...evaluationData,
+        createdAt: Timestamp.now()
+      });
+      return docRef.id;
+    } catch (error) {
+      console.error("Error adding microteaching evaluation:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Retrieves microteaching evaluations for a student, ordered by creation date descending.
+   * @param {string} studentId - The ID of the student.
+   * @returns {Promise<Array>} List of evaluations.
+   */
+  async getMicroteachings(studentId) {
+    if (!studentId) throw new Error("Student ID is required");
+
+    try {
+      const evaluationsRef = collection(db, 'students', studentId, 'microteachings');
+      const q = query(evaluationsRef, orderBy('createdAt', 'desc'));
+      const querySnapshot = await getDocs(q);
+
+      return querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        createdAt: doc.data().createdAt?.toDate ? doc.data().createdAt.toDate() : new Date(doc.data().createdAt)
+      }));
+    } catch (error) {
+      console.error("Error fetching microteaching evaluations:", error);
+      throw error;
+    }
+  }
 }
 
 export default new PracticeService();
