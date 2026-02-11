@@ -1,8 +1,48 @@
 import { db } from '../firebase';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import PracticeService from './PracticeService';
 
 class AdminService {
+  /**
+   * Removes students from Firestore that are not in the valid ID list.
+   * @param {Array<string>} validStudentIds - List of valid student IDs.
+   * @returns {Promise<Array<string>>} List of deleted student names (or IDs).
+   */
+  async cleanupDatabase(validStudentIds) {
+    if (!validStudentIds || !Array.isArray(validStudentIds)) {
+      throw new Error("Invalid validStudentIds provided");
+    }
+
+    const deletedStudents = [];
+    try {
+      const studentsSnap = await getDocs(collection(db, 'students'));
+
+      const deletePromises = [];
+
+      for (const docSnap of studentsSnap.docs) {
+        const studentId = docSnap.id;
+
+        // Safety check: Never delete the test user
+        if (studentId === '999999') continue;
+
+        if (!validStudentIds.includes(studentId)) {
+          const studentName = docSnap.data().name || studentId;
+          deletedStudents.push(`${studentName} (${studentId})`);
+
+          // Add to delete promises
+          deletePromises.push(deleteDoc(doc(db, 'students', studentId)));
+        }
+      }
+
+      await Promise.all(deletePromises);
+      return deletedStudents;
+
+    } catch (error) {
+      console.error("Error cleaning up database:", error);
+      throw error;
+    }
+  }
+
   /**
    * Fetches all schools.
    * @returns {Promise<Object>} Map of school IDs to names.
