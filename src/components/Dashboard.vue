@@ -211,6 +211,27 @@ onMounted(async () => {
           </div>
         </section>
 
+        <!-- Pedagogical Observations Section -->
+        <section class="bg-white rounded-xl shadow-md p-6 border-t-4 border-orange-500 transition hover:shadow-lg mb-8">
+          <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+            <span class="bg-orange-100 text-orange-600 p-2 rounded-full mr-3">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+            </span>
+            Pedagogické náslechy
+          </h3>
+          <p class="text-gray-600 mb-6">Sledujte a zaznamenávejte průběh vyučovacích hodin. Analyzujte aktivitu učitele a žáků.</p>
+
+          <a href="#observations" class="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 transition-colors">
+            Spustit nový náslech
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+          </a>
+        </section>
+
         <!-- My School Card -->
         <section class="bg-white rounded-xl shadow-md overflow-hidden border-t-4 border-blue-600 transition hover:shadow-lg mb-8">
           <div class="p-6">
