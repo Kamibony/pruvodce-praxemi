@@ -1,0 +1,33 @@
+name: Deploy Dev to Preview Channel
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  build_and_preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Application
+        run: npm run build
+        env:
+          VITE_GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
+      - name: Deploy to Firebase Preview Channel
+        uses: w9jds/firebase-action@master
+        with:
+          args: hosting:channel:deploy dev --expires 30d --project pruvodce-praxemi-2026
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
