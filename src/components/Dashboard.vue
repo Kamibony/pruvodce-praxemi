@@ -3,6 +3,7 @@ import { ref, onMounted, defineProps, computed } from 'vue';
 import StudentService from '../services/StudentService';
 import PracticeService from '../services/PracticeService';
 import AiChatWidget from './AiChatWidget.vue';
+import PracticeMicroteaching from './PracticeMicroteaching.vue';
 
 const props = defineProps({
   user: {
@@ -20,6 +21,7 @@ const error = ref(null);
 const logs = ref([]);
 const logForm = ref({ date: new Date().toISOString().slice(0, 10), activity: '', hours: 1 });
 const submittingLog = ref(false);
+const activeTab = ref('overview'); // 'overview', 'microteaching'
 
 const totalHours = computed(() => PracticeService.calculateTotalHours(logs.value));
 const goalHours = 15;
@@ -121,118 +123,144 @@ onMounted(async () => {
           <p class="text-gray-600 mt-2 text-lg">Vítej ve své aplikaci pro správu praxe.</p>
         </div>
 
-        <!-- Practice Log Section -->
-        <section class="bg-white rounded-xl shadow-md p-6 border-t-4 border-purple-600 transition hover:shadow-lg mb-8">
-          <h3 class="text-xl font-semibold text-gray-800 mb-6 flex items-center">
-            <span class="bg-purple-100 text-purple-600 p-2 rounded-full mr-3">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </span>
-            Deník praxe
-          </h3>
+        <!-- Navigation Tabs -->
+        <div class="flex space-x-1 bg-gray-200 p-1 rounded-xl mb-8">
+          <button
+            @click="activeTab = 'overview'"
+            class="flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors focus:outline-none"
+            :class="activeTab === 'overview' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'"
+          >
+            Deník a Náslechy
+          </button>
+          <button
+            @click="activeTab = 'microteaching'"
+            class="flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors focus:outline-none"
+            :class="activeTab === 'microteaching' ? 'bg-white text-indigo-700 shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'"
+          >
+            Výstupy (Microteaching)
+          </button>
+        </div>
 
-          <!-- Progress Bar -->
-          <div class="mb-8">
-            <div class="flex justify-between items-end mb-2">
-              <span class="text-sm font-medium text-gray-700">Celkový pokrok</span>
-              <span class="text-sm font-bold text-purple-700">{{ totalHours }} / {{ goalHours }} h</span>
+        <!-- Tab: Overview -->
+        <div v-if="activeTab === 'overview'" class="space-y-8">
+          <!-- Practice Log Section -->
+          <section class="bg-white rounded-xl shadow-md p-6 border-t-4 border-purple-600 transition hover:shadow-lg">
+            <h3 class="text-xl font-semibold text-gray-800 mb-6 flex items-center">
+              <span class="bg-purple-100 text-purple-600 p-2 rounded-full mr-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </span>
+              Deník praxe
+            </h3>
+
+            <!-- Progress Bar -->
+            <div class="mb-8">
+              <div class="flex justify-between items-end mb-2">
+                <span class="text-sm font-medium text-gray-700">Celkový pokrok</span>
+                <span class="text-sm font-bold text-purple-700">{{ totalHours }} / {{ goalHours }} h</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+                <div
+                  class="bg-purple-600 h-4 rounded-full transition-all duration-500 ease-out"
+                  :style="{ width: `${progressPercentage}%` }"
+                ></div>
+              </div>
+              <p v-if="totalHours < goalHours" class="text-xs text-gray-500 mt-1 text-right">Zbývá ještě {{ goalHours - totalHours }} h</p>
+              <p v-else class="text-xs text-green-600 mt-1 text-right font-bold">Gratulujeme! Praxe splněna.</p>
             </div>
-            <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
-              <div
-                class="bg-purple-600 h-4 rounded-full transition-all duration-500 ease-out"
-                :style="{ width: `${progressPercentage}%` }"
-              ></div>
+
+            <!-- Add Log Form -->
+            <div class="bg-gray-50 p-5 rounded-lg border border-gray-200 mb-6">
+              <h4 class="font-bold text-gray-700 mb-3 text-sm uppercase tracking-wide">Nový záznam</h4>
+              <form @submit.prevent="handleAddLog" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                <div class="md:col-span-3">
+                  <label class="block text-xs font-medium text-gray-500 mb-1">Datum</label>
+                  <input v-model="logForm.date" type="date" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm px-3 py-2 border">
+                </div>
+                <div class="md:col-span-6">
+                  <label class="block text-xs font-medium text-gray-500 mb-1">Aktivita</label>
+                  <input v-model="logForm.activity" type="text" required placeholder="Popis činnosti..." class="w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm px-3 py-2 border">
+                </div>
+                <div class="md:col-span-2">
+                  <label class="block text-xs font-medium text-gray-500 mb-1">Hodiny</label>
+                  <input v-model.number="logForm.hours" type="number" step="0.5" min="0.5" max="12" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm px-3 py-2 border">
+                </div>
+                <div class="md:col-span-1">
+                  <button
+                    type="submit"
+                    :disabled="submittingLog"
+                    class="w-full bg-purple-600 text-white p-2 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 transition-colors flex justify-center items-center h-[38px]"
+                  >
+                    <svg v-if="!submittingLog" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                    </svg>
+                    <span v-else class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
+                  </button>
+                </div>
+              </form>
             </div>
-            <p v-if="totalHours < goalHours" class="text-xs text-gray-500 mt-1 text-right">Zbývá ještě {{ goalHours - totalHours }} h</p>
-            <p v-else class="text-xs text-green-600 mt-1 text-right font-bold">Gratulujeme! Praxe splněna.</p>
-          </div>
 
-          <!-- Add Log Form -->
-          <div class="bg-gray-50 p-5 rounded-lg border border-gray-200 mb-6">
-            <h4 class="font-bold text-gray-700 mb-3 text-sm uppercase tracking-wide">Nový záznam</h4>
-            <form @submit.prevent="handleAddLog" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-              <div class="md:col-span-3">
-                <label class="block text-xs font-medium text-gray-500 mb-1">Datum</label>
-                <input v-model="logForm.date" type="date" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm px-3 py-2 border">
-              </div>
-              <div class="md:col-span-6">
-                <label class="block text-xs font-medium text-gray-500 mb-1">Aktivita</label>
-                <input v-model="logForm.activity" type="text" required placeholder="Popis činnosti..." class="w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm px-3 py-2 border">
-              </div>
-              <div class="md:col-span-2">
-                <label class="block text-xs font-medium text-gray-500 mb-1">Hodiny</label>
-                <input v-model.number="logForm.hours" type="number" step="0.5" min="0.5" max="12" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm px-3 py-2 border">
-              </div>
-              <div class="md:col-span-1">
-                <button
-                  type="submit"
-                  :disabled="submittingLog"
-                  class="w-full bg-purple-600 text-white p-2 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 transition-colors flex justify-center items-center h-[38px]"
-                >
-                  <svg v-if="!submittingLog" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-                  </svg>
-                  <span v-else class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
-                </button>
-              </div>
-            </form>
-          </div>
+            <!-- Logs List -->
+            <div class="overflow-hidden rounded-lg border border-gray-200">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Datum</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aktivita</th>
+                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Hodiny</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  <tr v-for="log in logs" :key="log.id" class="hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {{ new Date(log.date).toLocaleDateString('cs-CZ') }}
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-900">
+                      {{ log.activity }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right font-medium">
+                      {{ log.hours }} h
+                    </td>
+                  </tr>
+                  <tr v-if="logs.length === 0">
+                    <td colspan="3" class="px-6 py-8 text-center text-sm text-gray-500 italic">
+                      Zatím žádné záznamy.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
 
-          <!-- Logs List -->
-          <div class="overflow-hidden rounded-lg border border-gray-200">
-            <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-gray-50">
-                <tr>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Datum</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aktivita</th>
-                  <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Hodiny</th>
-                </tr>
-              </thead>
-              <tbody class="bg-white divide-y divide-gray-200">
-                <tr v-for="log in logs" :key="log.id" class="hover:bg-gray-50 transition-colors">
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {{ new Date(log.date).toLocaleDateString('cs-CZ') }}
-                  </td>
-                  <td class="px-6 py-4 text-sm text-gray-900">
-                    {{ log.activity }}
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right font-medium">
-                    {{ log.hours }} h
-                  </td>
-                </tr>
-                <tr v-if="logs.length === 0">
-                  <td colspan="3" class="px-6 py-8 text-center text-sm text-gray-500 italic">
-                    Zatím žádné záznamy.
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
+          <!-- Pedagogical Observations Section -->
+          <section class="bg-white rounded-xl shadow-md p-6 border-t-4 border-orange-500 transition hover:shadow-lg">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+              <span class="bg-orange-100 text-orange-600 p-2 rounded-full mr-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+              </span>
+              Pedagogické náslechy
+            </h3>
+            <p class="text-gray-600 mb-6">Sledujte a zaznamenávejte průběh vyučovacích hodin. Analyzujte aktivitu učitele a žáků.</p>
 
-        <!-- Pedagogical Observations Section -->
-        <section class="bg-white rounded-xl shadow-md p-6 border-t-4 border-orange-500 transition hover:shadow-lg mb-8">
-          <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-            <span class="bg-orange-100 text-orange-600 p-2 rounded-full mr-3">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            <a href="#observations" class="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 transition-colors">
+              Spustit nový náslech
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
               </svg>
-            </span>
-            Pedagogické náslechy
-          </h3>
-          <p class="text-gray-600 mb-6">Sledujte a zaznamenávejte průběh vyučovacích hodin. Analyzujte aktivitu učitele a žáků.</p>
+            </a>
+          </section>
+        </div>
 
-          <a href="#observations" class="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 transition-colors">
-            Spustit nový náslech
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-            </svg>
-          </a>
-        </section>
+        <!-- Tab: Microteaching -->
+        <div v-if="activeTab === 'microteaching'">
+          <PracticeMicroteaching :user="user" />
+        </div>
 
-        <!-- My School Card -->
+        <!-- My School Card (Common) -->
         <section class="bg-white rounded-xl shadow-md overflow-hidden border-t-4 border-blue-600 transition hover:shadow-lg mb-8">
           <div class="p-6">
             <h3 class="text-xl font-semibold text-gray-800 mb-6 flex items-center">
@@ -272,7 +300,7 @@ onMounted(async () => {
           </div>
         </section>
 
-        <!-- My Team Card -->
+        <!-- My Team Card (Common) -->
         <section class="bg-white rounded-xl shadow-md p-6 transition hover:shadow-lg mb-8">
           <h3 class="text-xl font-semibold text-gray-800 mb-6 flex items-center">
             <span class="bg-green-100 text-green-600 p-2 rounded-full mr-3">
@@ -299,7 +327,7 @@ onMounted(async () => {
           </div>
         </section>
 
-        <!-- FAQ Section -->
+        <!-- FAQ Section (Common) -->
         <section class="bg-white rounded-xl shadow-md p-6">
           <h3 class="text-xl font-semibold text-gray-800 mb-6 flex items-center">
             <span class="bg-yellow-100 text-yellow-600 p-2 rounded-full mr-3">
