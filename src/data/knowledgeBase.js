@@ -16,6 +16,10 @@ Instituce: střední odborné školy, střední odborná učiliště: Přímé s
 
 Rozsah: čtyři týdny nebo 2 týdny. Podmínkou zkrácené praxe na 2 týdny je schválená žádost od ředitele IVP, kdy studentka/student písemně dokládá vlastní pedagogické působení na odborné škole v rozsahu 2 let. Termín podání žádosti viz Důležité termíny v harmonogramu IVP.
 
+Specifika pro zkrácenou praxi (2 týdny):
+- Požadovaný rozsah výstupů: Student musí mít v deníku zaznamenáno celkem 9 vyučovacích jednotek (cvičení či hodin).
+- Pravidlo zápočtu dlouhých bloků: U zkrácených praxí, které v jednom dni přesáhnou více než 5 hodin, se do deníku započítávají jako 2 odučené hodiny/jednotky.
+
 Cíle: ověřit pedagogickou, odbornou i morální připravenost studentky/studenta pro pedagogickou práci, tj.
 a) osvojit si potřebné dovednosti a zkušenosti v oblasti vyučovací a výchovné činnosti (plánování, organizování, řízení a hodnocení výuky);
 b) seznámit se s provozem školy a s vedením pedagogické dokumentace;
