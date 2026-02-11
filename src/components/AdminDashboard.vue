@@ -1,11 +1,46 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import AdminService from '../services/AdminService';
+import { students as sourceStudents } from '../data/migrationData';
 
 const students = ref([]);
 const schools = ref({});
 const loading = ref(true);
 const error = ref(null);
+const cleanupLoading = ref(false);
+const cleanupResult = ref(null);
+
+const runCleanup = async () => {
+  if (!confirm('Opravdu chcete smazat studenty, kteří nejsou v Excelu (AdminImport)? Tato akce je nevratná.')) {
+    return;
+  }
+
+  cleanupLoading.value = true;
+  cleanupResult.value = null;
+
+  try {
+    const validIds = sourceStudents.map(s => s.id);
+    const deletedNames = await AdminService.cleanupDatabase(validIds);
+
+    if (deletedNames.length > 0) {
+      cleanupResult.value = `Smazáno ${deletedNames.length} záznamů:\n${deletedNames.join(', ')}`;
+      // Refresh list
+      const [studentsData, schoolsData] = await Promise.all([
+        AdminService.getAllStudentsWithStats(),
+        AdminService.getSchools()
+      ]);
+      students.value = studentsData;
+      schools.value = schoolsData;
+    } else {
+      cleanupResult.value = "Žádné staré záznamy nebyly nalezeny. Databáze je čistá.";
+    }
+  } catch (e) {
+    console.error(e);
+    alert("Chyba při čištění databáze: " + e.message);
+  } finally {
+    cleanupLoading.value = false;
+  }
+};
 
 const orphanedStudents = computed(() => {
   return students.value.filter(student => {
@@ -56,6 +91,31 @@ const getRowClass = (student) => {
     </header>
 
     <main class="container mx-auto px-4 py-8 max-w-6xl">
+      <!-- Actions Toolbar -->
+      <div class="bg-white shadow-sm p-4 mb-6 flex flex-col md:flex-row items-center justify-between rounded-lg border border-gray-200">
+        <div class="mb-4 md:mb-0">
+          <h2 class="text-lg font-semibold text-gray-700">Akce databáze</h2>
+          <p class="text-sm text-gray-500">Správa a údržba záznamů.</p>
+        </div>
+        <div class="flex space-x-3">
+          <button
+            @click="runCleanup"
+            :disabled="cleanupLoading || loading"
+            class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:opacity-50 flex items-center transition-colors shadow"
+          >
+            <span v-if="cleanupLoading" class="animate-spin h-4 w-4 mr-2 border-2 border-white border-t-transparent rounded-full"></span>
+            Smazat staré záznamy (Cleanup)
+          </button>
+        </div>
+      </div>
+
+      <!-- Cleanup Result Message -->
+      <div v-if="cleanupResult" class="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-4 mb-6 rounded shadow-sm whitespace-pre-line relative">
+        <div class="font-bold mb-1">Výsledek čištění:</div>
+        {{ cleanupResult }}
+        <button @click="cleanupResult = null" class="absolute top-2 right-2 text-blue-400 hover:text-blue-600 font-bold">&times;</button>
+      </div>
+
       <!-- Loading State -->
       <div v-if="loading" class="flex justify-center items-center h-64">
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
