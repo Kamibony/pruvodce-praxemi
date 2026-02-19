@@ -234,7 +234,7 @@ async function saveParsedData() {
     log(`Zapisujem ${parsedStudents.value.length} študentov...`)
     for (const s of parsedStudents.value) {
       const ref = doc(db, 'students', s.id)
-      batch.set(ref, s)
+      batch.set(ref, s, { merge: true })
       count++
     }
 
