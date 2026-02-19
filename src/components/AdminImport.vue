@@ -11,11 +11,29 @@
           <input
             id="file_input"
             type="file"
-            @change="handleFileUpload"
+            @change="handleFileSelect"
             accept=".xlsx, .xls, .csv"
             class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
           />
-          <p class="mt-1 text-sm text-gray-500">Očekávané sloupce: 'ID osoby', 'Celé jméno s tituly', '1. týden'...</p>
+          <p class="mt-1 text-sm text-gray-500">Očekává se formát rozvrhu (Škola, 1. týden...)</p>
+
+          <button
+            @click="analyzeFile"
+            :disabled="!selectedFile || loading"
+            class="mt-4 w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded transition disabled:opacity-50"
+          >
+            Analyzovat soubor
+          </button>
+
+          <div v-if="unmatchedNames.length > 0" class="mt-4 p-4 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded">
+            <h3 class="font-bold mb-2 flex items-center">
+              ⚠️ Nepodařilo se spárovat ({{ unmatchedNames.length }}):
+            </h3>
+            <p class="text-sm mb-2">Tato jména byla v souboru nalezena, ale neodpovídají žádnému studentovi v databázi.</p>
+            <ul class="list-disc list-inside text-sm max-h-40 overflow-y-auto">
+              <li v-for="name in unmatchedNames" :key="name">{{ name }}</li>
+            </ul>
+          </div>
 
           <div v-if="parsedStudents.length > 0" class="mt-4">
             <h3 class="font-bold mb-2">Náhled dat ({{ parsedStudents.length }} záznamů):</h3>
@@ -74,10 +92,13 @@ import { doc, writeBatch } from 'firebase/firestore'
 import { db } from '../firebase'
 import { schools, faq } from '../data/migrationData'
 import { read, utils } from 'xlsx'
+import AdminService from '../services/AdminService'
 
 const loading = ref(false)
 const logs = ref([])
 const parsedStudents = ref([])
+const unmatchedNames = ref([])
+const selectedFile = ref(null)
 
 const log = (msg) => logs.value.push(`> ${msg}`)
 
@@ -85,116 +106,217 @@ const log = (msg) => logs.value.push(`> ${msg}`)
 
 function normalizeString(str) {
   if (!str) return '';
-  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
 }
 
-async function handleFileUpload(event) {
+function handleFileSelect(event) {
   const file = event.target.files[0]
-  if (!file) return
+  if (file) {
+    selectedFile.value = file
+    parsedStudents.value = []
+    unmatchedNames.value = []
+    logs.value = []
+    log(`Vybrán soubor: ${file.name}`)
+  }
+}
 
+async function analyzeFile() {
+  if (!selectedFile.value) return
   loading.value = true
   logs.value = []
-  log(`Načítám soubor: ${file.name}`)
+  parsedStudents.value = []
+  unmatchedNames.value = []
 
   try {
-    const data = await file.arrayBuffer()
+    log('Načítám studenty z databáze...')
+    const dbStudents = await AdminService.getAllStudentsBasic()
+    log(`Načteno ${dbStudents.length} studentů z DB.`)
+
+    // Create lookup map for faster access (normalized name -> id)
+    const studentMap = new Map()
+    dbStudents.forEach(s => {
+       const normName = normalizeString(s.name)
+       studentMap.set(normName, s.id)
+    })
+
+    log('Čtu soubor...')
+    const data = await selectedFile.value.arrayBuffer()
     const workbook = read(data)
     const firstSheetName = workbook.SheetNames[0]
     const worksheet = workbook.Sheets[firstSheetName]
-    const json = utils.sheet_to_json(worksheet)
 
-    log(`Nalezených ${json.length} řádků. Analyzuji...`)
-    if (json.length > 0) {
-      log('Klíče prvního řádku: ' + Object.keys(json[0]).join(', '))
+    // Read as 2D array
+    const rows = utils.sheet_to_json(worksheet, { header: 1 })
+    log(`Načteno ${rows.length} řádků.`)
+
+    // Find Header Row
+    let headerRowIndex = -1
+    let schoolColIndex = -1
+    let weekColIndices = []
+
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i]
+      if (!row) continue
+      // Look for "Škola" and "1. týden"
+      const schoolIdx = row.findIndex(cell => cell && String(cell).includes('Škola'))
+      const week1Idx = row.findIndex(cell => cell && (String(cell).includes('1. týden') || String(cell).includes('1. tyden')))
+
+      if (schoolIdx !== -1 && week1Idx !== -1) {
+        headerRowIndex = i
+        schoolColIndex = schoolIdx
+        // Find all week columns
+        row.forEach((cell, idx) => {
+          if (cell && (String(cell).includes('týden') || String(cell).includes('tyden'))) {
+            weekColIndices.push(idx)
+          }
+        })
+        break
+      }
     }
 
-    const result = []
+    if (headerRowIndex === -1) {
+      throw new Error("Nenalezena hlavička tabulky (očekáváno 'Škola' a '1. týden').")
+    }
 
-    // Create mapping for fuzzy search of schools
+    log(`Hlavička nalezena na řádku ${headerRowIndex + 1}. Sloupec školy: ${schoolColIndex}, Počet týdnů: ${weekColIndices.length}`)
+
+    // Preparation for aggregation
+    // Map: NormalizedStudentName -> { name: originalName, schoolId: string, weeks: Set }
+    const studentAgg = new Map()
+
+    // Create mapping for fuzzy search of schools (reusing logic)
     const schoolEntries = Object.entries(schools).map(([id, data]) => ({
       id,
       name: data.name,
       normalizedName: normalizeString(data.name)
     }))
 
-    for (const row of json) {
-      // 1. Extract ID and Name
-      const idRaw = row['ID osoby'] || row['Osobní číslo'] || row['id']
-      const name = row['Celé jméno s tituly'] || row['Jméno'] || row['name']
+    // Iterate rows
+    for (let i = headerRowIndex + 1; i < rows.length; i++) {
+      const row = rows[i]
+      if (!row || row.length === 0) continue
 
-      if (!idRaw || !name) continue // Skip invalid rows
-
-      const id = String(idRaw).trim()
-
-      // 2. Determine Practice Length
-      // Check columns for content
-      const week1 = row['1. týden'] || row['1. tyden']
-      const week2 = row['2. týden'] || row['2. tyden']
-      const week3 = row['3. týden'] || row['3. tyden']
-      const week4 = row['4. týden'] || row['4. tyden']
-
-      const hasWeek3 = !!week3
-      const hasWeek4 = !!week4
-
-      const isShort = !hasWeek3 && !hasWeek4
-      const goalHours = isShort ? 9 : 15
-      const weekLabel = isShort ? '1.-2. týden' : '1.-4. týden'
-
-      // 3. School Mapping
+      // Determine School for this row
+      const schoolCell = row[schoolColIndex]
       let schoolId = 'nezarazeno'
+      if (schoolCell) {
+        const normalizedSchoolName = normalizeString(String(schoolCell))
 
-      // Collect all text from week columns to find school name
-      const scheduleText = [week1, week2, week3, week4].filter(Boolean).join(' ')
-      const normalizedSchedule = normalizeString(scheduleText)
-
-      for (const school of schoolEntries) {
-        // 1. Exact/Substring match of full name
-        if (normalizedSchedule.includes(school.normalizedName) ||
-            (school.normalizedName.length > 5 && normalizedSchedule.includes(school.normalizedName.substring(0, 10)))) {
+        // Fuzzy match school
+        for (const school of schoolEntries) {
+          if (normalizedSchoolName.includes(school.normalizedName) ||
+              (school.normalizedName.length > 5 && normalizedSchoolName.includes(school.normalizedName.substring(0, 10)))) {
             schoolId = school.id
             break
-        }
+          }
+           // 2. Significant word match
+          const schoolWords = school.normalizedName.split(/\s+/).filter(w => w.length > 3)
+          const ignored = ['stredni', 'skola', 'odborna', 'vyssi', 'sou', 'sos', 'gymnazium', 'prazska', 'praha', 'skoly']
+          const significantSchoolWords = schoolWords.filter(w => !ignored.includes(w))
 
-        // 2. Significant word match (e.g. "Horovice" inside "SOS a SOU Horovice")
-        const schoolWords = school.normalizedName.split(/\s+/).filter(w => w.length > 3)
-        const ignored = ['stredni', 'skola', 'odborna', 'vyssi', 'sou', 'sos', 'gymnazium', 'prazska', 'praha', 'skoly']
-        const significantSchoolWords = schoolWords.filter(w => !ignored.includes(w))
-
-        if (significantSchoolWords.length > 0 && significantSchoolWords.some(w => normalizedSchedule.includes(w))) {
-           schoolId = school.id
-           break
+          if (significantSchoolWords.length > 0 && significantSchoolWords.some(w => normalizedSchoolName.includes(w))) {
+             schoolId = school.id
+             break
+          }
         }
       }
 
-      result.push({
-        id,
-        name,
-        schoolId,
-        week: weekLabel,
-        goalHours
-      })
+      // Check weeks
+      for (const colIdx of weekColIndices) {
+        const cellValue = row[colIdx]
+        if (cellValue && typeof cellValue === 'string' && cellValue.trim().length > 3) {
+          const name = cellValue.trim()
+          const normName = normalizeString(name)
+
+          if (!studentAgg.has(normName)) {
+            studentAgg.set(normName, {
+              originalName: name,
+              schoolId: schoolId,
+              weeks: new Set()
+            })
+          }
+
+          const rec = studentAgg.get(normName)
+          rec.weeks.add(colIdx)
+          if (rec.schoolId === 'nezarazeno' && schoolId !== 'nezarazeno') {
+            rec.schoolId = schoolId
+          }
+        }
+      }
     }
 
-    parsedStudents.value = result
-    log(`Zpracovaných ${result.length} studentů.`)
+    log(`Nalezeno ${studentAgg.size} unikátních jmen v rozvrhu.`)
+
+    // Match against DB
+    const matched = []
+    const unmatched = []
+
+    for (const [normName, data] of studentAgg.entries()) {
+      // Try to find in DB
+      let dbId = null
+
+      // 1. Exact normalized match
+      if (studentMap.has(normName)) {
+        dbId = studentMap.get(normName)
+      } else {
+        // 2. Fuzzy / Substring match
+        for (const [dbNormName, id] of studentMap.entries()) {
+           if (dbNormName.includes(normName) || normName.includes(dbNormName)) {
+             dbId = id
+             break
+           }
+
+           // Check if parts match (FirstName LastName)
+           const parts1 = normName.split(' ').filter(p => p.length > 2)
+           const parts2 = dbNormName.split(' ').filter(p => p.length > 2)
+
+           if (parts1.length > 1 && parts2.length > 1) {
+             const allPartsMatch = parts1.every(p => dbNormName.includes(p))
+             if (allPartsMatch) {
+               dbId = id
+               break
+             }
+           }
+        }
+      }
+
+      if (dbId) {
+        const weekCount = data.weeks.size
+        // Logic: <= 2 weeks -> 9h, > 2 -> 15h
+        const goalHours = weekCount <= 2 ? 9 : 15
+        const weekLabel = weekCount <= 2 ? '1.-2. týden (zkrácená)' : '1.-4. týden'
+
+        matched.push({
+          id: dbId,
+          name: data.originalName,
+          dbName: dbStudents.find(s => s.id === dbId)?.name,
+          schoolId: data.schoolId,
+          goalHours,
+          week: weekLabel
+        })
+      } else {
+        unmatched.push(data.originalName)
+      }
+    }
+
+    parsedStudents.value = matched
+    unmatchedNames.value = unmatched
+    log(`Spárováno ${matched.length} studentů. Nespárováno: ${unmatched.length}.`)
 
   } catch (e) {
     console.error(e)
-    log('❌ CHYBA při čtení souboru: ' + e.message)
+    log('❌ CHYBA: ' + e.message)
   } finally {
     loading.value = false
   }
 }
 
 async function saveParsedData() {
-  if (!confirm(`Opravdu chcete přepsat databázi ${parsedStudents.value.length} záznamy?`)) return
+  if (!confirm(`Opravdu chcete aktualizovat databázi pro ${parsedStudents.value.length} studentů?`)) return
 
   loading.value = true
-  // logs.value = [] // Keep logs from parsing
-
   try {
     const batch = writeBatch(db)
-    let count = 0
 
     log('Ověřuji existenci škol...')
     for (const [id, data] of Object.entries(schools)) {
@@ -209,13 +331,18 @@ async function saveParsedData() {
     log(`Zapisuji ${parsedStudents.value.length} studentů...`)
     for (const s of parsedStudents.value) {
       const ref = doc(db, 'students', s.id)
-      batch.set(ref, s, { merge: true })
-      count++
+      batch.set(ref, {
+        schoolId: s.schoolId,
+        goalHours: s.goalHours,
+        week: s.week
+      }, { merge: true })
     }
 
-    log(`Odesílám dávku...`)
     await batch.commit()
-    log('✅ DATA BYLA ULOŽENA!')
+    log('✅ DATA BYLA ÚSPĚŠNĚ AKTUALIZOVÁNA!')
+    parsedStudents.value = []
+    selectedFile.value = null
+    unmatchedNames.value = []
 
   } catch (e) {
     console.error(e)

@@ -97,6 +97,23 @@ class AdminService {
   }
 
   /**
+   * Fetches all students with basic info (id, name).
+   * @returns {Promise<Array>} List of students { id, name }.
+   */
+  async getAllStudentsBasic() {
+    try {
+      const studentsSnap = await getDocs(collection(db, 'students'));
+      return studentsSnap.docs.map(doc => ({
+        id: doc.id,
+        name: doc.data().name || ''
+      }));
+    } catch (error) {
+      console.error("Error fetching students:", error);
+      throw error;
+    }
+  }
+
+  /**
    * Fetches all students and calculates their total practice hours.
    * optimize: fetches schools once, and fetches logs in parallel.
    * @returns {Promise<Array>} List of students with stats.
