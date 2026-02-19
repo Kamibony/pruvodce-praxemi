@@ -1,5 +1,5 @@
 import { db } from '../firebase';
-import { collection, getDocs, deleteDoc, updateDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, deleteDoc, updateDoc, doc, getDoc, setDoc } from 'firebase/firestore';
 import PracticeService from './PracticeService';
 
 class AdminService {
@@ -143,6 +143,79 @@ class AdminService {
       return students;
     } catch (error) {
       console.error("Error fetching admin data:", error);
+      throw error;
+    }
+  }
+
+  // --- Knowledge Base Methods ---
+
+  /**
+   * Fetches the list of knowledge base documents.
+   * @returns {Promise<Array>} List of documents.
+   */
+  async getKnowledgeBaseDocuments() {
+    try {
+      const docRef = doc(db, 'system_settings', 'knowledgeBase');
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        return docSnap.data().documents || [];
+      }
+      return [];
+    } catch (error) {
+      console.error("Error fetching knowledge base documents:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Adds a document to the knowledge base.
+   * @param {object} documentData - The document object { id, filename, content, uploadedAt }.
+   * @returns {Promise<void>}
+   */
+  async addKnowledgeBaseDocument(documentData) {
+    if (!documentData || !documentData.id || !documentData.content) {
+      throw new Error("Invalid document data");
+    }
+    try {
+      const docRef = doc(db, 'system_settings', 'knowledgeBase');
+      const docSnap = await getDoc(docRef);
+
+      let documents = [];
+      if (docSnap.exists()) {
+        documents = docSnap.data().documents || [];
+      }
+
+      documents.push(documentData);
+
+      await setDoc(docRef, { documents: documents }, { merge: true });
+    } catch (error) {
+      console.error("Error adding knowledge base document:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Removes a document from the knowledge base by ID.
+   * @param {string} documentId - The ID of the document to remove.
+   * @returns {Promise<void>}
+   */
+  async deleteKnowledgeBaseDocument(documentId) {
+    if (!documentId) throw new Error("Document ID is required");
+    try {
+      const docRef = doc(db, 'system_settings', 'knowledgeBase');
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        let documents = docSnap.data().documents || [];
+        const initialLength = documents.length;
+        documents = documents.filter(doc => doc.id !== documentId);
+
+        if (documents.length !== initialLength) {
+          await updateDoc(docRef, { documents: documents });
+        }
+      }
+    } catch (error) {
+      console.error("Error deleting knowledge base document:", error);
       throw error;
     }
   }

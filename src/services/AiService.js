@@ -14,22 +14,32 @@ export default {
 
     try {
       // Fetch dynamic instruction from Firestore
-      let systemInstruction = DEFAULT_INSTRUCTION;
+      let knowledgeBaseText = DEFAULT_INSTRUCTION;
       try {
         const docRef = doc(db, 'system_settings', 'knowledgeBase');
         const docSnap = await getDoc(docRef);
-        if (docSnap.exists() && docSnap.data().content) {
-          systemInstruction = docSnap.data().content;
+
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data.documents && Array.isArray(data.documents) && data.documents.length > 0) {
+            // Concatenate content from all documents
+            knowledgeBaseText = data.documents.map(d => d.content).join('\n\n');
+          } else if (data.content) {
+            // Fallback to legacy content field
+            knowledgeBaseText = data.content;
+          }
         }
       } catch (e) {
         console.warn('Failed to fetch dynamic knowledge base, using default.', e);
       }
 
+      const strictSystemInstruction = `Jsi asistent pro praxe. TÝMTO TI STRIKTNĚ ZAKAZUJI používat obecné znalosti z internetu. ODPOVÍDEJ POUZE A VÝHRADNĚ na základě textu níže. Pokud odpověď v textu nenajdeš, nespekuluj. Omluv se a napiš: 'Tuto informaci bohužel nemám v aktuálních metodikách. Kontaktujte prosím koordinátora praxí.'\n\n--- KONTEXT METODIKY ---\n\n${knowledgeBaseText}`;
+
       const genAI = new GoogleGenerativeAI(API_KEY);
       const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-      // Construct the prompt with the system instruction
-      const prompt = `${systemInstruction}\n\nOtázka studenta: ${userMessage}`;
+      // Construct the prompt with the strict instruction
+      const prompt = `${strictSystemInstruction}\n\nOtázka studenta: ${userMessage}`;
 
       const result = await model.generateContent(prompt);
       const response = await result.response;

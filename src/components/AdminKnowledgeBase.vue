@@ -1,20 +1,20 @@
 <template>
   <div class="bg-white p-6 rounded-lg shadow border border-gray-200 mt-8">
     <div class="flex justify-between items-center mb-4">
-      <h2 class="text-xl font-bold text-gray-800">AI Znalostní báze</h2>
+      <h2 class="text-xl font-bold text-gray-800">Správa dokumentů (AI Znalostní báze)</h2>
       <div v-if="statusMessage" :class="statusClass" class="text-sm font-medium px-3 py-1 rounded">
         {{ statusMessage }}
       </div>
     </div>
 
     <p class="text-sm text-gray-600 mb-4">
-      Zde můžete nahrát dokumenty (PDF, DOCX, TXT), které budou sloužit jako zdroj informací pro AI asistenta.
-      Text můžete také ručně upravit.
+      Zde spravujete dokumenty, které slouží jako zdroj informací pro AI asistenta.
+      AI bude odpovídat výhradně na základě obsahu těchto dokumentů.
     </p>
 
     <!-- File Upload -->
     <div class="mb-6">
-      <label class="block text-sm font-medium text-gray-700 mb-2">Nahrát dokument</label>
+      <label class="block text-sm font-medium text-gray-700 mb-2">Nahrát nový dokument</label>
       <div class="flex items-center gap-4">
         <input
           type="file"
@@ -27,57 +27,61 @@
       </div>
     </div>
 
-    <!-- Editor -->
+    <!-- Documents List -->
     <div class="mb-4">
-      <label class="block text-sm font-medium text-gray-700 mb-2">
-        Obsah znalostní báze
-        <span class="text-xs text-gray-500 font-normal ml-2">(Tento text bude použit jako instrukce pro AI)</span>
-      </label>
-      <textarea
-        v-model="knowledgeBaseContent"
-        rows="15"
-        class="w-full px-3 py-2 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 font-mono"
-        placeholder="Zde se zobrazí text z nahraného dokumentu..."
-      ></textarea>
-    </div>
+      <h3 class="text-lg font-semibold text-gray-800 mb-3">Nahrané dokumenty</h3>
 
-    <!-- Actions -->
-    <div class="flex justify-end gap-3">
-      <button
-        @click="resetToDefault"
-        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-      >
-        Obnovit výchozí
-      </button>
-      <button
-        @click="saveKnowledgeBase"
-        :disabled="isSaving"
-        class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex items-center gap-2"
-      >
-        <span v-if="isSaving" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-        {{ isSaving ? 'Ukládám...' : 'Uložit pro AI' }}
-      </button>
+      <div v-if="documents.length === 0" class="text-gray-500 italic text-sm">
+        Žádné dokumenty nebyly nahrány.
+      </div>
+
+      <div v-else class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Název souboru</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Datum nahrání</th>
+              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Akce</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr v-for="doc in documents" :key="doc.id">
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ doc.filename }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {{ formatDate(doc.uploadedAt) }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <button
+                  @click="deleteDocument(doc.id)"
+                  class="text-red-600 hover:text-red-900"
+                  :disabled="isDeleting === doc.id"
+                >
+                  {{ isDeleting === doc.id ? 'Mazání...' : 'Smazat' }}
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import AdminService from '../services/AdminService';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.mjs?url';
 import mammoth from 'mammoth';
-import { SYSTEM_INSTRUCTION as defaultInstruction } from '../data/knowledgeBase';
 
 // Configure PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
-const knowledgeBaseContent = ref('');
+const documents = ref([]);
 const isProcessing = ref(false);
-const isSaving = ref(false);
+const isDeleting = ref(null); // ID of document being deleted
 const statusMessage = ref('');
-const statusType = ref('info'); // info, success, error
+const statusType = ref('info');
 
 const statusClass = computed(() => {
   switch (statusType.value) {
@@ -98,23 +102,21 @@ const showStatus = (msg, type = 'info', duration = 3000) => {
 };
 
 onMounted(async () => {
-  await loadKnowledgeBase();
+  await loadDocuments();
 });
 
-const loadKnowledgeBase = async () => {
+const loadDocuments = async () => {
   try {
-    const docRef = doc(db, 'system_settings', 'knowledgeBase');
-    const docSnap = await getDoc(docRef);
-
-    if (docSnap.exists()) {
-      knowledgeBaseContent.value = docSnap.data().content;
-    } else {
-      // Fallback to default if not set in DB
-      knowledgeBaseContent.value = defaultInstruction;
-    }
+    const docs = await AdminService.getKnowledgeBaseDocuments();
+    // Sort by uploadedAt desc
+    documents.value = docs.sort((a, b) => {
+        const dateA = new Date(a.uploadedAt || 0);
+        const dateB = new Date(b.uploadedAt || 0);
+        return dateB - dateA;
+    });
   } catch (error) {
-    console.error('Error loading knowledge base:', error);
-    showStatus('Nepodařilo se načíst znalostní bázi.', 'error');
+    console.error('Error loading documents:', error);
+    showStatus('Nepodařilo se načíst dokumenty.', 'error');
   }
 };
 
@@ -139,20 +141,40 @@ const handleFileUpload = async (event) => {
       throw new Error('Nepodporovaný formát souboru.');
     }
 
-    // Append or Replace? Let's replace for now as per "upload... to feed" usually implies setting the source.
-    // However, user might want to append. Let's make it replace but user can copy-paste if needed.
-    // Or better: Confirm with user? No, simplicity first. Just set it.
-    knowledgeBaseContent.value = text;
-    showStatus('Soubor úspěšně zpracován.', 'success');
+    const newDoc = {
+        id: crypto.randomUUID(),
+        filename: file.name,
+        content: text,
+        uploadedAt: new Date().toISOString()
+    };
+
+    await AdminService.addKnowledgeBaseDocument(newDoc);
+    await loadDocuments(); // Reload list
+    showStatus('Dokument úspěšně nahrán.', 'success');
   } catch (error) {
     console.error('Error parsing file:', error);
     showStatus(`Chyba při zpracování souboru: ${error.message}`, 'error');
   } finally {
     isProcessing.value = false;
-    // Clear the input so the same file can be selected again if needed
     event.target.value = '';
   }
 };
+
+const deleteDocument = async (id) => {
+    if(!confirm('Opravdu chcete smazat tento dokument?')) return;
+
+    isDeleting.value = id;
+    try {
+        await AdminService.deleteKnowledgeBaseDocument(id);
+        await loadDocuments();
+        showStatus('Dokument byl smazán.', 'success');
+    } catch (e) {
+        console.error("Delete failed", e);
+        showStatus('Chyba při mazání dokumentu.', 'error');
+    } finally {
+        isDeleting.value = null;
+    }
+}
 
 const parseTxt = (file) => {
   return new Promise((resolve, reject) => {
@@ -185,31 +207,9 @@ const parsePdf = async (file) => {
   return fullText;
 };
 
-const saveKnowledgeBase = async () => {
-  if (!knowledgeBaseContent.value.trim()) {
-    showStatus('Znalostní báze nemůže být prázdná.', 'error');
-    return;
-  }
-
-  isSaving.value = true;
-  try {
-    const docRef = doc(db, 'system_settings', 'knowledgeBase');
-    await setDoc(docRef, {
-      content: knowledgeBaseContent.value,
-      updatedAt: new Date()
-    });
-    showStatus('Znalostní báze byla uložena.', 'success');
-  } catch (error) {
-    console.error('Error saving knowledge base:', error);
-    showStatus('Chyba při ukládání do databáze.', 'error');
-  } finally {
-    isSaving.value = false;
-  }
-};
-
-const resetToDefault = () => {
-  if (confirm('Opravdu chcete obnovit výchozí systémovou instrukci? Neuložené změny budou ztraceny.')) {
-    knowledgeBaseContent.value = defaultInstruction;
-  }
-};
+const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('cs-CZ') + ' ' + date.toLocaleTimeString('cs-CZ');
+}
 </script>
