@@ -4,6 +4,7 @@ import Login from './components/Login.vue';
 import Dashboard from './components/Dashboard.vue';
 import AdminImport from './components/AdminImport.vue';
 import AdminDashboard from './components/AdminDashboard.vue';
+import ObservationView from './components/ObservationView.vue';
 
 const currentHash = ref(window.location.hash);
 const isLoggedIn = ref(false);
@@ -34,6 +35,7 @@ const isRoute = (route) => currentHash.value === route;
 <template>
   <AdminDashboard v-if="isRoute('#admin-dashboard')" />
   <AdminImport v-else-if="isRoute('#admin')" />
+  <ObservationView v-else-if="isRoute('#observations')" />
   <div v-else>
     <Dashboard
       v-if="isLoggedIn"
