@@ -1,13 +1,13 @@
 <template>
   <div class="min-h-screen flex items-center justify-center bg-gray-100 p-4">
     <div class="bg-white p-8 rounded-lg shadow-xl max-w-4xl w-full">
-      <h1 class="text-2xl font-bold mb-6 text-gray-800">Admin Migrácia Dát</h1>
+      <h1 class="text-2xl font-bold mb-6 text-gray-800">Admin Import Dat</h1>
 
       <!-- NEW SECTION: Dynamic Excel Import -->
       <div class="mb-8 border-b pb-8">
         <h2 class="text-xl font-semibold mb-4 text-blue-800">1. Dynamický Import (Excel/CSV)</h2>
         <div class="space-y-4">
-          <label class="block mb-2 text-sm font-medium text-gray-900" for="file_input">Nahrať rozvrh (XLSX/CSV)</label>
+          <label class="block mb-2 text-sm font-medium text-gray-900" for="file_input">Nahrát rozvrh (XLSX/CSV)</label>
           <input
             id="file_input"
             type="file"
@@ -15,19 +15,19 @@
             accept=".xlsx, .xls, .csv"
             class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
           />
-          <p class="mt-1 text-sm text-gray-500">Očakávané stĺpce: 'ID osoby', 'Celé jméno s tituly', '1. týden'...</p>
+          <p class="mt-1 text-sm text-gray-500">Očekávané sloupce: 'ID osoby', 'Celé jméno s tituly', '1. týden'...</p>
 
           <div v-if="parsedStudents.length > 0" class="mt-4">
-            <h3 class="font-bold mb-2">Náhľad dát ({{ parsedStudents.length }} záznamov):</h3>
+            <h3 class="font-bold mb-2">Náhled dat ({{ parsedStudents.length }} záznamů):</h3>
             <div class="overflow-x-auto max-h-64 border rounded">
               <table class="min-w-full text-sm text-left">
                 <thead class="bg-gray-100 sticky top-0">
                   <tr>
                     <th class="p-2 border-b">ID</th>
-                    <th class="p-2 border-b">Meno</th>
+                    <th class="p-2 border-b">Jméno</th>
                     <th class="p-2 border-b">Škola (ID)</th>
-                    <th class="p-2 border-b">Cieľ</th>
-                    <th class="p-2 border-b">Týždne</th>
+                    <th class="p-2 border-b">Cíl</th>
+                    <th class="p-2 border-b">Týdny</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -52,7 +52,7 @@
               :disabled="loading"
               class="mt-4 w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded transition disabled:opacity-50 shadow-lg"
             >
-              {{ loading ? 'Ukladám...' : 'ULOŽIŤ NAČÍTANÉ DÁTA DO DB' }}
+              {{ loading ? 'Ukládám...' : 'ULOŽIT NAČTENÁ DATA DO DB' }}
             </button>
           </div>
         </div>
@@ -94,7 +94,7 @@ async function handleFileUpload(event) {
 
   loading.value = true
   logs.value = []
-  log(`Načítavam súbor: ${file.name}`)
+  log(`Načítám soubor: ${file.name}`)
 
   try {
     const data = await file.arrayBuffer()
@@ -103,9 +103,9 @@ async function handleFileUpload(event) {
     const worksheet = workbook.Sheets[firstSheetName]
     const json = utils.sheet_to_json(worksheet)
 
-    log(`Nájdených ${json.length} riadkov. Analyzujem...`)
+    log(`Nalezených ${json.length} řádků. Analyzuji...`)
     if (json.length > 0) {
-      log('Kľúče prvého riadku: ' + Object.keys(json[0]).join(', '))
+      log('Klíče prvního řádku: ' + Object.keys(json[0]).join(', '))
     }
 
     const result = []
@@ -176,18 +176,18 @@ async function handleFileUpload(event) {
     }
 
     parsedStudents.value = result
-    log(`Spracovaných ${result.length} študentov.`)
+    log(`Zpracovaných ${result.length} studentů.`)
 
   } catch (e) {
     console.error(e)
-    log('❌ CHYBA pri čítaní súboru: ' + e.message)
+    log('❌ CHYBA při čtení souboru: ' + e.message)
   } finally {
     loading.value = false
   }
 }
 
 async function saveParsedData() {
-  if (!confirm(`Naozaj chcete prepísať databázu ${parsedStudents.value.length} záznamami?`)) return
+  if (!confirm(`Opravdu chcete přepsat databázi ${parsedStudents.value.length} záznamy?`)) return
 
   loading.value = true
   // logs.value = [] // Keep logs from parsing
@@ -196,30 +196,30 @@ async function saveParsedData() {
     const batch = writeBatch(db)
     let count = 0
 
-    log('Uisťujem sa, že existujú školy...')
+    log('Ověřuji existenci škol...')
     for (const [id, data] of Object.entries(schools)) {
       const ref = doc(db, 'schools', id)
       batch.set(ref, data)
     }
 
-    log('Uisťujem sa, že existujú FAQ...')
+    log('Ověřuji existenci FAQ...')
     const faqRef = doc(db, 'content', 'faq')
     batch.set(faqRef, { items: faq })
 
-    log(`Zapisujem ${parsedStudents.value.length} študentov...`)
+    log(`Zapisuji ${parsedStudents.value.length} studentů...`)
     for (const s of parsedStudents.value) {
       const ref = doc(db, 'students', s.id)
       batch.set(ref, s, { merge: true })
       count++
     }
 
-    log(`Odosielam dávku...`)
+    log(`Odesílám dávku...`)
     await batch.commit()
-    log('✅ DÁTA BOLI ULOŽENÉ!')
+    log('✅ DATA BYLA ULOŽENA!')
 
   } catch (e) {
     console.error(e)
-    log('❌ CHYBA pri ukladaní: ' + e.message)
+    log('❌ CHYBA při ukládání: ' + e.message)
   } finally {
     loading.value = false
   }
