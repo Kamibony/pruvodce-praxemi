@@ -191,109 +191,126 @@ async function analyzeFile() {
     const rows = utils.sheet_to_json(worksheet, { header: 1 })
     log(`Načteno ${rows.length} řádků.`)
 
-    // Find Header Row
-    let headerRowIndex = -1
-    let schoolColIndex = -1
-    let weekColIndices = []
+    // --- BLOCK-CHUNKING LOGIC ---
+    let blocks = []
+    let currentBlock = null
 
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i]
-      if (!row) continue
-      // Look for "Škola" and "1. týden"
-      const schoolIdx = row.findIndex(cell => cell && String(cell).includes('Škola'))
+      if (!row || row.length === 0) continue
+
+      // Detect Header Row
+      const schoolIdx = row.findIndex(cell => cell && String(cell).toLowerCase().includes('škola'))
       const week1Idx = row.findIndex(cell => cell && (String(cell).includes('1. týden') || String(cell).includes('1. tyden')))
 
       if (schoolIdx !== -1 && week1Idx !== -1) {
-        headerRowIndex = i
-        schoolColIndex = schoolIdx
-        // Find all week columns
+        // Found a header!
+        if (currentBlock) {
+          blocks.push(currentBlock)
+        }
+
+        const weekColIndices = []
         row.forEach((cell, idx) => {
           if (cell && (String(cell).includes('týden') || String(cell).includes('tyden'))) {
             weekColIndices.push(idx)
           }
         })
-        break
+
+        currentBlock = {
+          schoolParts: [],
+          rows: [],
+          schoolColIndex: schoolIdx,
+          weekColIndices: weekColIndices
+        }
+        continue // Skip the header row itself
+      }
+
+      // Process Content Row (if inside a block)
+      if (currentBlock) {
+         // 1. Check for School Name Part
+         const schoolCell = row[currentBlock.schoolColIndex]
+         if (schoolCell) {
+           const str = String(schoolCell).trim()
+           if (str.length > 2) {
+             currentBlock.schoolParts.push(str)
+           }
+         }
+         // 2. Add row to block
+         currentBlock.rows.push(row)
       }
     }
 
-    if (headerRowIndex === -1) {
-      throw new Error("Nenalezena hlavička tabulky (očekáváno 'Škola' a '1. týden').")
+    // Push the final block
+    if (currentBlock) {
+      blocks.push(currentBlock)
     }
 
-    log(`Hlavička nalezena na řádku ${headerRowIndex + 1}. Sloupec školy: ${schoolColIndex}, Počet týdnů: ${weekColIndices.length}`)
+    log(`Nalezeno ${blocks.length} bloků rozvrhu.`)
 
     // Preparation for aggregation
-    // Map: NormalizedStudentName -> { name: originalName, schoolId: string, weeks: Set }
     const studentAgg = new Map()
 
-    // Create mapping for fuzzy search of schools (reusing logic)
+    // Create mapping for fuzzy search of schools
     const schoolEntries = Object.entries(schools).map(([id, data]) => ({
       id,
       name: data.name,
       normalizedName: normalizeString(data.name)
     }))
 
-    // Iterate rows
-    let currentSchool = '' // Forward-fill variable for merged cells
+    // Process Blocks
+    for (const block of blocks) {
+       // Unified School Name
+       const rawSchoolName = block.schoolParts.join(' ').trim()
+       let schoolId = 'nezarazeno'
 
-    for (let i = headerRowIndex + 1; i < rows.length; i++) {
-      const row = rows[i]
-      if (!row || row.length === 0) continue
+       if (rawSchoolName) {
+         const normalizedSchoolName = normalizeString(rawSchoolName)
 
-      // Determine School for this row (Forward-Fill Logic)
-      const schoolCell = row[schoolColIndex]
-      if (schoolCell) {
-        currentSchool = String(schoolCell)
-      }
-
-      let schoolId = 'nezarazeno'
-      // Use currentSchool (last seen non-empty value)
-      if (currentSchool) {
-        const normalizedSchoolName = normalizeString(currentSchool)
-
-        // Fuzzy match school
-        for (const school of schoolEntries) {
-          if (normalizedSchoolName.includes(school.normalizedName) ||
-              (school.normalizedName.length > 5 && normalizedSchoolName.includes(school.normalizedName.substring(0, 10)))) {
-            schoolId = school.id
-            break
-          }
-           // 2. Significant word match
-          const schoolWords = school.normalizedName.split(/\s+/).filter(w => w.length > 3)
-          const ignored = ['stredni', 'skola', 'odborna', 'vyssi', 'sou', 'sos', 'gymnazium', 'prazska', 'praha', 'skoly']
-          const significantSchoolWords = schoolWords.filter(w => !ignored.includes(w))
-
-          if (significantSchoolWords.length > 0 && significantSchoolWords.some(w => normalizedSchoolName.includes(w))) {
+         // Fuzzy match school (Same logic as before)
+         for (const school of schoolEntries) {
+           if (normalizedSchoolName.includes(school.normalizedName) ||
+               (school.normalizedName.length > 5 && normalizedSchoolName.includes(school.normalizedName.substring(0, 10)))) {
              schoolId = school.id
              break
-          }
-        }
-      }
+           }
+            // Significant word match
+           const schoolWords = school.normalizedName.split(/\s+/).filter(w => w.length > 3)
+           const ignored = ['stredni', 'skola', 'odborna', 'vyssi', 'sou', 'sos', 'gymnazium', 'prazska', 'praha', 'skoly']
+           const significantSchoolWords = schoolWords.filter(w => !ignored.includes(w))
 
-      // Check weeks
-      for (const colIdx of weekColIndices) {
-        const cellValue = row[colIdx]
+           if (significantSchoolWords.length > 0 && significantSchoolWords.some(w => normalizedSchoolName.includes(w))) {
+              schoolId = school.id
+              break
+           }
+         }
+       }
 
-        // Use Strict Validator to filter false positives
-        if (isValidStudentCell(cellValue)) {
-          const name = String(cellValue).trim()
-          const normName = normalizeName(name) // Use improved normalization
+       // Iterate rows in block to find students
+       for (const row of block.rows) {
+         for (const colIdx of block.weekColIndices) {
+           const cellValue = row[colIdx]
 
-          if (!studentAgg.has(normName)) {
-            studentAgg.set(normName, {
-              originalName: name,
-              schoolId: schoolId,
-              weeks: new Set()
-            })
-          }
+           if (isValidStudentCell(cellValue)) {
+             const name = String(cellValue).trim()
+             const normName = normalizeName(name)
 
-          const rec = studentAgg.get(normName)
-          rec.weeks.add(colIdx) // Count unique columns as unique weeks
-          if (rec.schoolId === 'nezarazeno' && schoolId !== 'nezarazeno') {
-            rec.schoolId = schoolId
-          }
-        }
-      }
+             if (!studentAgg.has(normName)) {
+               studentAgg.set(normName, {
+                 originalName: name,
+                 schoolId: schoolId,
+                 weeks: new Set()
+               })
+             }
+
+             const rec = studentAgg.get(normName)
+             rec.weeks.add(colIdx)
+             // Update schoolId if better one found (though usually consistent within block)
+             if (rec.schoolId === 'nezarazeno' && schoolId !== 'nezarazeno') {
+               rec.schoolId = schoolId
+             }
+           }
+         }
+       }
     }
 
     log(`Nalezeno ${studentAgg.size} unikátních jmen v rozvrhu.`)
@@ -328,6 +345,42 @@ async function analyzeFile() {
                break
              }
            }
+        }
+
+        // 3. RELAXED FALLBACK MATCHING (Natálie vs Natalia)
+        if (!dbId) {
+            const parts1 = normName.split(' ').filter(p => p.length > 0)
+
+            for (const [dbNormName, id] of studentMap.entries()) {
+                const parts2 = dbNormName.split(' ').filter(p => p.length > 0)
+
+                // Find exact common part > 4 chars (Last Name Assumption)
+                let commonLastName = null
+
+                for (let p1 of parts1) {
+                    if (p1.length > 4 && parts2.includes(p1)) {
+                        commonLastName = p1
+                        break
+                    }
+                }
+
+                if (commonLastName) {
+                    const remaining1 = parts1.filter(p => p !== commonLastName)
+                    const remaining2 = parts2.filter(p => p !== commonLastName)
+
+                    if (remaining1.length > 0 && remaining2.length > 0) {
+                        const fn1 = remaining1[0]
+                        const fn2 = remaining2[0]
+
+                        // Check if First Name starts with same 3 letters
+                        if (fn1.length >= 3 && fn2.length >= 3 && fn1.substring(0, 3) === fn2.substring(0, 3)) {
+                            dbId = id
+                            log(`Fallback shoda: ${data.originalName} ~ ${dbNormName}`)
+                            break
+                        }
+                    }
+                }
+            }
         }
       }
 
