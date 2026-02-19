@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import AdminService from '../services/AdminService';
+import AdminImport from './AdminImport.vue';
 import { students as sourceStudents } from '../data/migrationData';
 
 const students = ref([]);
@@ -107,6 +108,10 @@ const getRowClass = (student) => {
             Smazat staré záznamy (Cleanup)
           </button>
         </div>
+      </div>
+
+      <div class="mb-6">
+        <AdminImport />
       </div>
 
       <!-- Cleanup Result Message -->
