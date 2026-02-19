@@ -1,5 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { SYSTEM_INSTRUCTION } from '../data/knowledgeBase.js';
+import { SYSTEM_INSTRUCTION as DEFAULT_INSTRUCTION } from '../data/knowledgeBase.js';
+import { db } from '../firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
@@ -11,10 +13,23 @@ export default {
     }
 
     try {
+      // Fetch dynamic instruction from Firestore
+      let systemInstruction = DEFAULT_INSTRUCTION;
+      try {
+        const docRef = doc(db, 'system_settings', 'knowledgeBase');
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists() && docSnap.data().content) {
+          systemInstruction = docSnap.data().content;
+        }
+      } catch (e) {
+        console.warn('Failed to fetch dynamic knowledge base, using default.', e);
+      }
+
       const genAI = new GoogleGenerativeAI(API_KEY);
       const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-      const prompt = `${SYSTEM_INSTRUCTION}\n\nOtázka studenta: ${userMessage}`;
+      // Construct the prompt with the system instruction
+      const prompt = `${systemInstruction}\n\nOtázka studenta: ${userMessage}`;
 
       const result = await model.generateContent(prompt);
       const response = await result.response;

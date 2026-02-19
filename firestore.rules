@@ -40,5 +40,12 @@ service cloud.firestore {
     match /faq/{document=**} {
       allow read: if true;
     }
+
+    // System Settings (Knowledge Base)
+    match /system_settings/{document=**} {
+      allow read: if request.auth != null;
+      // TODO: Restrict write to admins only when roles are implemented
+      allow write: if request.auth != null;
+    }
   }
 }

@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from 'vue';
 import { utils, writeFile } from 'xlsx';
 import AdminService from '../services/AdminService';
 import AdminImport from './AdminImport.vue';
+import AdminKnowledgeBase from './AdminKnowledgeBase.vue';
 
 const students = ref([]);
 const schools = ref({});
@@ -136,6 +137,11 @@ const getRowClass = (student) => {
       <!-- Import Section -->
       <div class="mb-6">
         <AdminImport />
+      </div>
+
+      <!-- Knowledge Base Section -->
+      <div class="mb-6">
+        <AdminKnowledgeBase />
       </div>
 
       <!-- Loading State -->
