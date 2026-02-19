@@ -109,6 +109,48 @@ function normalizeString(str) {
   return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
 }
 
+// Improved Normalization for Student Names (Strips Titles)
+function normalizeName(str) {
+  if (!str) return '';
+  let clean = String(str);
+
+  // Common Czech titles to strip
+  const titles = [
+    "Bc\\.", "BcA\\.", "Mgr\\.", "Ing\\.", "PhDr\\.", "DiS\\.", "MUDr\\.", "Ph\\.D\\.",
+    "Bc\\b", "BcA\\b", "Mgr\\b", "Ing\\b", "PhDr\\b", "DiS\\b", "MUDr\\b", "PhD\\b"
+  ];
+
+  // Create regex for titles (word boundary + title)
+  const titleRegex = new RegExp(`\\b(${titles.join('|')})`, 'gi');
+  clean = clean.replace(titleRegex, '');
+
+  // Remove commas
+  clean = clean.replace(/,/g, '');
+
+  // Normalize accents, lowercase, trim
+  return clean.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim().replace(/\s+/g, ' ');
+}
+
+// Validator for Student Cells (Filters False Positives)
+function isValidStudentCell(cellValue) {
+  if (!cellValue) return false;
+  const str = String(cellValue).trim();
+
+  // Filter out short strings
+  if (str.length < 4) return false;
+
+  // Filter out emails
+  if (str.includes('@')) return false;
+
+  // Filter out headers/metadata
+  if (str.toLowerCase().includes('tyden') || str.toLowerCase().includes('týden')) return false;
+
+  // Filter out strings with numbers (likely headers like '1. týden')
+  if (/\d/.test(str)) return false;
+
+  return true;
+}
+
 function handleFileSelect(event) {
   const file = event.target.files[0]
   if (file) {
@@ -132,10 +174,10 @@ async function analyzeFile() {
     const dbStudents = await AdminService.getAllStudentsBasic()
     log(`Načteno ${dbStudents.length} studentů z DB.`)
 
-    // Create lookup map for faster access (normalized name -> id)
+    // Create lookup map using NORMALIZED names (stripped titles)
     const studentMap = new Map()
     dbStudents.forEach(s => {
-       const normName = normalizeString(s.name)
+       const normName = normalizeName(s.name)
        studentMap.set(normName, s.id)
     })
 
@@ -192,15 +234,22 @@ async function analyzeFile() {
     }))
 
     // Iterate rows
+    let currentSchool = '' // Forward-fill variable for merged cells
+
     for (let i = headerRowIndex + 1; i < rows.length; i++) {
       const row = rows[i]
       if (!row || row.length === 0) continue
 
-      // Determine School for this row
+      // Determine School for this row (Forward-Fill Logic)
       const schoolCell = row[schoolColIndex]
-      let schoolId = 'nezarazeno'
       if (schoolCell) {
-        const normalizedSchoolName = normalizeString(String(schoolCell))
+        currentSchool = String(schoolCell)
+      }
+
+      let schoolId = 'nezarazeno'
+      // Use currentSchool (last seen non-empty value)
+      if (currentSchool) {
+        const normalizedSchoolName = normalizeString(currentSchool)
 
         // Fuzzy match school
         for (const school of schoolEntries) {
@@ -224,9 +273,11 @@ async function analyzeFile() {
       // Check weeks
       for (const colIdx of weekColIndices) {
         const cellValue = row[colIdx]
-        if (cellValue && typeof cellValue === 'string' && cellValue.trim().length > 3) {
-          const name = cellValue.trim()
-          const normName = normalizeString(name)
+
+        // Use Strict Validator to filter false positives
+        if (isValidStudentCell(cellValue)) {
+          const name = String(cellValue).trim()
+          const normName = normalizeName(name) // Use improved normalization
 
           if (!studentAgg.has(normName)) {
             studentAgg.set(normName, {
@@ -237,7 +288,7 @@ async function analyzeFile() {
           }
 
           const rec = studentAgg.get(normName)
-          rec.weeks.add(colIdx)
+          rec.weeks.add(colIdx) // Count unique columns as unique weeks
           if (rec.schoolId === 'nezarazeno' && schoolId !== 'nezarazeno') {
             rec.schoolId = schoolId
           }
@@ -255,7 +306,7 @@ async function analyzeFile() {
       // Try to find in DB
       let dbId = null
 
-      // 1. Exact normalized match
+      // 1. Exact normalized match (now includes stripped titles)
       if (studentMap.has(normName)) {
         dbId = studentMap.get(normName)
       } else {
@@ -282,9 +333,9 @@ async function analyzeFile() {
 
       if (dbId) {
         const weekCount = data.weeks.size
-        // Logic: <= 2 weeks -> 9h, > 2 -> 15h
-        const goalHours = weekCount <= 2 ? 9 : 15
-        const weekLabel = weekCount <= 2 ? '1.-2. týden (zkrácená)' : '1.-4. týden'
+        // Logic: >= 3 weeks -> 15h, else 9h (Fixed logic)
+        const goalHours = weekCount >= 3 ? 15 : 9
+        const weekLabel = weekCount >= 3 ? '1.-4. týden' : '1.-2. týden (zkrácená)'
 
         matched.push({
           id: dbId,
