@@ -1,8 +1,43 @@
 import { db } from '../firebase';
-import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, deleteDoc, updateDoc, doc } from 'firebase/firestore';
 import PracticeService from './PracticeService';
 
 class AdminService {
+  /**
+   * Updates a student's data.
+   * @param {string} studentId - The ID of the student.
+   * @param {object} data - The data to update (name, schoolId, goalHours).
+   * @returns {Promise<void>}
+   */
+  async updateStudent(studentId, data) {
+    if (!studentId) throw new Error("Student ID is required");
+    try {
+      const studentRef = doc(db, 'students', studentId);
+      await updateDoc(studentRef, data);
+    } catch (error) {
+      console.error("Error updating student:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Deletes a student.
+   * @param {string} studentId - The ID of the student.
+   * @returns {Promise<void>}
+   */
+  async deleteStudent(studentId) {
+    if (!studentId) throw new Error("Student ID is required");
+    // Safety check: Never delete the test user
+    if (studentId === '999999') throw new Error("Cannot delete test user 999999");
+
+    try {
+      await deleteDoc(doc(db, 'students', studentId));
+    } catch (error) {
+      console.error("Error deleting student:", error);
+      throw error;
+    }
+  }
+
   /**
    * Removes students from Firestore that are not in the valid ID list.
    * @param {Array<string>} validStudentIds - List of valid student IDs.
@@ -84,24 +119,12 @@ class AdminService {
         try {
           // Re-using PracticeService logic
           const logs = await PracticeService.getLogs(studentId);
-          totalHours = PracticeService.calculateTotalHours(logs); // Note: calculateTotalHours is synchronous if logs is array
-          // Wait, PracticeService.calculateTotalHours is an instance method? Yes.
-          // But wait, logs is an array of objects. calculateTotalHours takes array.
-          // Let's check PracticeService definition.
-          // calculateTotalHours(logs) { ... }
-          // Yes.
-
-          // Actually, getLogs returns Promise<Array>. So we await it.
-          // Then calculateTotalHours.
-
-           // Re-read PracticeService.js:
-           // calculateTotalHours(logs) { if (!Array.isArray(logs)) return 0; ... }
-           // Yes.
-
-           // However, if getLogs throws (e.g. permission denied?), we catch it.
+          totalHours = PracticeService.calculateTotalHours(logs);
         } catch (e) {
           console.warn(`Failed to fetch logs for student ${studentId}`, e);
         }
+
+        const goalHours = studentData.goalHours || 15;
 
         return {
           id: studentId,
@@ -109,7 +132,8 @@ class AdminService {
           schoolId: studentData.schoolId || '',
           schoolName: schoolsMap[studentData.schoolId] || 'Neznámá škola',
           totalHours: totalHours,
-          status: totalHours >= 15 ? 'Splněno' : 'Probíhá' // Assuming 15h goal
+          goalHours: goalHours,
+          status: totalHours >= goalHours ? 'Splněno' : 'Probíhá'
         };
       });
 

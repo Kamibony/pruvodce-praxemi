@@ -58,31 +58,6 @@
         </div>
       </div>
 
-      <!-- OLD SECTION: Hardcoded Migration -->
-      <div>
-        <h2 class="text-xl font-semibold mb-4 text-gray-600">2. Hardcoded Migrácia (Legacy)</h2>
-        <div class="space-y-4 opacity-75">
-          <p class="text-gray-600 text-sm">
-            Tento nástroj natvrdo prepíše databázu údajmi z <code>src/data/migrationData.js</code>.
-          </p>
-          <div class="bg-gray-50 p-4 rounded text-sm">
-            <strong>Pripravené na upload:</strong>
-            <ul class="list-disc ml-5">
-              <li>{{ hardcodedStudents.length }} študentov</li>
-              <li>{{ Object.keys(schools).length }} škôl</li>
-              <li>FAQ (Čeština)</li>
-            </ul>
-          </div>
-
-          <button
-            @click="runMigration"
-            :disabled="loading"
-            class="w-full py-3 px-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded transition disabled:opacity-50"
-          >
-            {{ loading ? 'Nahrávam...' : 'SPUSTIŤ LEGACY MIGRÁCIU' }}
-          </button>
-        </div>
-      </div>
 
       <!-- LOGS -->
       <div v-if="logs.length" class="mt-8 p-4 bg-gray-900 text-green-400 font-mono text-xs rounded h-64 overflow-y-auto shadow-inner">
@@ -97,7 +72,7 @@
 import { ref } from 'vue'
 import { doc, writeBatch } from 'firebase/firestore'
 import { db } from '../firebase'
-import { students as hardcodedStudents, schools, faq } from '../data/migrationData'
+import { schools, faq } from '../data/migrationData'
 import { read, utils } from 'xlsx'
 
 const loading = ref(false)
@@ -250,45 +225,4 @@ async function saveParsedData() {
   }
 }
 
-// --- HARDCODED DATA SOURCE (LEGACY) ---
-
-async function runMigration() {
-  if (!confirm('Naozaj chcete prepísať databázu (Legacy)?')) return
-  loading.value = true
-  logs.value = []
-
-  try {
-    const batch = writeBatch(db)
-    let count = 0
-
-    log('Pripravujem školy...')
-    for (const [id, data] of Object.entries(schools)) {
-      const ref = doc(db, 'schools', id)
-      batch.set(ref, data)
-      count++
-    }
-
-    log('Pripravujem FAQ...')
-    const faqRef = doc(db, 'content', 'faq')
-    batch.set(faqRef, { items: faq })
-    count++
-
-    log(`Pripravujem ${hardcodedStudents.length} študentov...`)
-    for (const s of hardcodedStudents) {
-      const ref = doc(db, 'students', s.id)
-      batch.set(ref, s)
-      count++
-    }
-
-    log(`Odosielam ${count} záznamov do Firestore...`)
-    await batch.commit()
-    log('✅ HOTOVO! Databáza je aktualizovaná.')
-
-  } catch (e) {
-    console.error(e)
-    log('❌ CHYBA: ' + e.message)
-  } finally {
-    loading.value = false
-  }
-}
 </script>
