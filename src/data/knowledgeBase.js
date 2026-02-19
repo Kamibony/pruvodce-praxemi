@@ -18,7 +18,6 @@ Rozsah: čtyři týdny nebo 2 týdny. Podmínkou zkrácené praxe na 2 týdny je
 
 Specifika pro zkrácenou praxi (2 týdny):
 - Požadovaný rozsah výstupů: Student musí mít v deníku zaznamenáno celkem 9 vyučovacích jednotek (cvičení či hodin).
-- Pravidlo zápočtu dlouhých bloků: U zkrácených praxí, které v jednom dni přesáhnou více než 5 hodin, se do deníku započítávají jako 2 odučené hodiny/jednotky.
 
 Cíle: ověřit pedagogickou, odbornou i morální připravenost studentky/studenta pro pedagogickou práci, tj.
 a) osvojit si potřebné dovednosti a zkušenosti v oblasti vyučovací a výchovné činnosti (plánování, organizování, řízení a hodnocení výuky);
@@ -30,6 +29,8 @@ e) upevnit vztah k učitelské profesi a ověřit si předpoklady pro její vyko
 2. Průběh souvislé řízené pedagogické praxe
 Studentka/student vykonává na cvičné škole náslechy (řízené pozorování) u cvičného učitele a samostatné pedagogické výstupy v rozsahu 10–15 vyučovacích hodin týdně. Celkový počet vyučovacích hodin (přímá pedagogická činnost) je minimálně 15 hodin za celou dobu praxe.
 Do přímé pedagogické činnosti se započítávají odučené vyučovací hodiny (včetně párové výuky) a také náslechy u cvičného učitele. Ostatní čas tráví studentka/student na cvičné škole (přípravy na výuku, konzultace s cvičným učitelem, studium školních dokumentů, účast na poradách, dozory o přestávkách apod.). Přítomnost studentky/studenta na pracovišti je evidována v "Deníku praxe" (nebo v "Přehledu činnosti").
+
+Pravidlo zápočtu dlouhých bloků: Pokud praxe v jednom dni přesáhne více než 5 hodin, započítává se do deníku jako 2 odučené hodiny/jednotky. Toto pravidlo platí plošně pro VŠECHNY studenty a všechny typy praxí (plné i zkrácené).
 
 3. Povinnosti studentky/studenta
 - Před nástupem na praxi kontaktovat cvičnou školu a domluvit si podrobnosti nástupu.
