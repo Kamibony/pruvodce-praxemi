@@ -105,7 +105,8 @@ class AdminService {
       const studentsSnap = await getDocs(collection(db, 'students'));
       return studentsSnap.docs.map(doc => ({
         id: doc.id,
-        name: doc.data().name || ''
+        name: doc.data().name || '',
+        schoolId: doc.data().schoolId || 'nezarazeno'
       }));
     } catch (error) {
       console.error("Error fetching students:", error);
