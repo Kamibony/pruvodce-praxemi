@@ -29,17 +29,6 @@
           </p>
         </div>
 
-        <!-- EMERGENCY FIX BUTTON -->
-        <div class="mb-6">
-          <button
-            @click="fixSchools"
-            :disabled="loading"
-            class="text-xs text-red-600 underline hover:text-red-800"
-          >
-            🔧 Opravit školy z původního seznamu (Emergency Patch)
-          </button>
-        </div>
-
         <div class="space-y-4">
           <label class="block mb-2 text-sm font-medium text-gray-900" for="file_input">Nahrát rozvrh (XLSX/CSV)</label>
           <input
@@ -515,93 +504,5 @@ async function saveParsedData() {
   }
 }
 
-async function fixSchools() {
-  if (!confirm("Spustit opravný skript pro školy? (Pouze pro specifický seznam jmen)")) return
-  loading.value = true
-  logs.value = []
-  log("Spouštím opravu škol...")
-
-  const mapping = {
-    // Original list (maintained for completeness)
-    "Pfeiferová Lenka": "jezdectvi",
-    "Nováková Kristýna": "jezdectvi",
-    "Stjepanovičová Barbara": "jezdectvi",
-    "Krejčí Jan": "vos_umelecka",
-    "Turynská Šárka": "vos_umelecka",
-    "Veselá Štochlová Pavlína": "vos_umelecka",
-    "Hlavatý Jan": "vos_umelecka",
-    "Černá Natálie": "vos_umelecka",
-    "Kučera Pavel": "jarov",
-    "Drtina Ondřej": "jarov",
-    "Veselá Veronika": "gym_praha9",
-    "Jelínek Ondřej": "gym_praha9",
-    "Zýková Ivana": "gym_praha9",
-    "Cinegrová Helena": "gym_praha9",
-    "Štrunc David": "gym_praha9",
-    "Cibulková Denisa": "gym_praha9",
-    "Kozlová Nikola": "gym_praha9",
-    "Hájek Borlová Alena": "gym_praha9",
-    "Ondráčková Nikol": "gym_praha9",
-
-    // NEW ADDITIONS (Emergency Patch Extension)
-    "David Kec": "radotin",
-    "Josef Černý": "radotin",
-    "David Bašus": "radotin",
-    "Vladimír Preksl": "radotin",
-    "Pavla Kučerová": "podnikani_gastro",
-    "Karolína Křížková": "podnikani_gastro",
-    "Jakub Bednář": "podnikani_gastro"
-  }
-
-  try {
-    const dbStudents = await AdminService.getAllStudentsBasic()
-    const batch = writeBatch(db)
-    let count = 0
-
-    for (const [name, targetSchoolId] of Object.entries(mapping)) {
-        const normTarget = normalizeName(name)
-        const targetTokens = normTarget.split(/\s+/).filter(t => t.length > 0)
-
-        // Find student by normalized name (flexible order: First Last vs Last First, plus potential extra tokens in DB)
-        const student = dbStudents.find(s => {
-           const normDb = normalizeName(s.name)
-
-           // 1. Exact match
-           if (normDb === normTarget) return true
-
-           // 2. Flexible subset match (all target tokens must exist in DB name)
-           const dbTokens = normDb.split(/\s+/).filter(t => t.length > 0)
-           return targetTokens.every(token => dbTokens.includes(token))
-        })
-
-        if (student) {
-            // Check if update is needed
-            if (student.schoolId !== targetSchoolId) {
-                const ref = doc(db, 'students', student.id)
-                batch.update(ref, { schoolId: targetSchoolId })
-                log(`Opravuji: ${student.name} (${student.id}) -> ${targetSchoolId}`)
-                count++
-            } else {
-                log(`OK: ${student.name} už má správnou školu.`)
-            }
-        } else {
-            log(`⚠️ Nenalezen student: ${name}`)
-        }
-    }
-
-    if (count > 0) {
-        await batch.commit()
-        log(`✅ Úspěšně opraveno ${count} studentů.`)
-    } else {
-        log("Žádné změny nebyly potřeba.")
-    }
-
-  } catch (e) {
-    console.error(e)
-    log("❌ Chyba při opravě: " + e.message)
-  } finally {
-    loading.value = false
-  }
-}
 
 </script>
