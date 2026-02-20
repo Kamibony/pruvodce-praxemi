@@ -29,6 +29,17 @@
           </p>
         </div>
 
+        <!-- EMERGENCY FIX BUTTON -->
+        <div class="mb-6">
+          <button
+            @click="fixSchools"
+            :disabled="loading"
+            class="text-xs text-red-600 underline hover:text-red-800"
+          >
+            🔧 Opravit školy z původního seznamu (Emergency Patch)
+          </button>
+        </div>
+
         <div class="space-y-4">
           <label class="block mb-2 text-sm font-medium text-gray-900" for="file_input">Nahrát rozvrh (XLSX/CSV)</label>
           <input
@@ -419,11 +430,20 @@ async function analyzeFile() {
         const goalHours = weekCount >= 3 ? 15 : 9
         const weekLabel = weekCount >= 3 ? '1.-4. týden' : '1.-2. týden (zkrácená)'
 
+        // NEW LOGIC: Check existing DB school
+        // If DB has a valid school, do NOT overwrite it with Excel data (safeguard)
+        const dbStudent = dbStudents.find(s => s.id === dbId)
+        let finalSchoolId = data.schoolId
+
+        if (dbStudent && dbStudent.schoolId && dbStudent.schoolId !== 'nezarazeno') {
+             finalSchoolId = dbStudent.schoolId
+        }
+
         matched.push({
           id: dbId,
           name: data.originalName,
-          dbName: dbStudents.find(s => s.id === dbId)?.name,
-          schoolId: data.schoolId,
+          dbName: dbStudent?.name,
+          schoolId: finalSchoolId,
           goalHours,
           week: weekLabel
         })
@@ -490,6 +510,74 @@ async function saveParsedData() {
   } catch (e) {
     console.error(e)
     log('❌ CHYBA při ukládání: ' + e.message)
+  } finally {
+    loading.value = false
+  }
+}
+
+async function fixSchools() {
+  if (!confirm("Spustit opravný skript pro školy? (Pouze pro specifický seznam jmen)")) return
+  loading.value = true
+  logs.value = []
+  log("Spouštím opravu škol...")
+
+  const mapping = {
+    "Pfeiferová Lenka": "jezdectvi",
+    "Nováková Kristýna": "jezdectvi",
+    "Stjepanovičová Barbara": "jezdectvi",
+    "Krejčí Jan": "vos_umelecka",
+    "Turynská Šárka": "vos_umelecka",
+    "Veselá Štochlová Pavlína": "vos_umelecka",
+    "Hlavatý Jan": "vos_umelecka",
+    "Černá Natálie": "vos_umelecka",
+    "Kučera Pavel": "jarov",
+    "Drtina Ondřej": "jarov",
+    "Veselá Veronika": "gym_praha9",
+    "Jelínek Ondřej": "gym_praha9",
+    "Zýková Ivana": "gym_praha9",
+    "Cinegrová Helena": "gym_praha9",
+    "Štrunc David": "gym_praha9",
+    "Cibulková Denisa": "gym_praha9",
+    "Kozlová Nikola": "gym_praha9",
+    "Hájek Borlová Alena": "gym_praha9",
+    "Ondráčková Nikol": "gym_praha9"
+  }
+
+  try {
+    const dbStudents = await AdminService.getAllStudentsBasic()
+    const batch = writeBatch(db)
+    let count = 0
+
+    for (const [name, targetSchoolId] of Object.entries(mapping)) {
+        const normTarget = normalizeName(name)
+        // Find student by normalized name
+        const student = dbStudents.find(s => normalizeName(s.name) === normTarget)
+
+        if (student) {
+            // Check if update is needed
+            if (student.schoolId !== targetSchoolId) {
+                const ref = doc(db, 'students', student.id)
+                batch.update(ref, { schoolId: targetSchoolId })
+                log(`Opravuji: ${student.name} (${student.id}) -> ${targetSchoolId}`)
+                count++
+            } else {
+                log(`OK: ${student.name} už má správnou školu.`)
+            }
+        } else {
+            log(`⚠️ Nenalezen student: ${name}`)
+        }
+    }
+
+    if (count > 0) {
+        await batch.commit()
+        log(`✅ Úspěšně opraveno ${count} studentů.`)
+    } else {
+        log("Žádné změny nebyly potřeba.")
+    }
+
+  } catch (e) {
+    console.error(e)
+    log("❌ Chyba při opravě: " + e.message)
   } finally {
     loading.value = false
   }
