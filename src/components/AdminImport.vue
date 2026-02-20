@@ -6,6 +6,17 @@
       <!-- NEW SECTION: Dynamic Excel Import -->
       <div class="mb-8 border-b pb-8">
         <h2 class="text-xl font-semibold mb-4 text-blue-800">1. Dynamický Import (Excel/CSV)</h2>
+
+        <!-- INFO ALERT -->
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 text-sm text-blue-900">
+          <p class="leading-relaxed">
+            ℹ️ <strong>Jak import funguje:</strong> Excelový soubor slouží pouze k jednorázové aktualizaci škol a hodin u stávajících studentů.
+            Po kliknutí na 'Uložit do DB' se data bezpečně propíšou do systému.
+            <strong>Po obnovení stránky zmizí název souboru z tohoto pole – to je v pořádku a data jsou v bezpečí.</strong>
+            Soubor nemusíte nahrávat znovu, dokud nemáte nový rozvrh. Nahrání nového souboru přepíše aktuální přiřazení škol.
+          </p>
+        </div>
+
         <div class="space-y-4">
           <label class="block mb-2 text-sm font-medium text-gray-900" for="file_input">Nahrát rozvrh (XLSX/CSV)</label>
           <input
