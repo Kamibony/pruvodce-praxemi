@@ -7,6 +7,22 @@
       </div>
     </div>
 
+    <!-- INFO ALERT -->
+    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 text-sm text-blue-900 leading-relaxed">
+      <h3 class="font-bold mb-2 text-blue-800">ℹ️ Jak funguje mozek AI asistenta:</h3>
+      <p class="mb-2">
+        Tyto dokumenty tvoří <strong>jediný a výhradní zdroj informací</strong> pro chatbota. AI nemá přístup na internet a nespekuluje.
+      </p>
+      <ul class="list-disc list-inside mb-2 ml-2 space-y-1">
+        <li><strong>Pokud nenahrajete žádný dokument:</strong> AI bude odpovídat pouze ze svých omezených, předvolených základních instrukcí.</li>
+        <li><strong>Pokud nahrajete dokumenty:</strong> AI začne čerpat <strong>výhradně z nich</strong>.</li>
+      </ul>
+      <p class="mt-2 font-semibold text-yellow-800 bg-yellow-50 p-2 rounded border border-yellow-200">
+        ⚠️ <strong>Důležité:</strong> Musíte nahrát <strong>všechny</strong> platné dokumenty (např. metodiku pro 2. ročník i metodiku pro 3. ročník).
+        Pokud nahrajete jen jeden, AI "zapomene" vše ostatní a na dotazy z chybějících dokumentů nedokáže odpovědět.
+      </p>
+    </div>
+
     <p class="text-sm text-gray-600 mb-4">
       Zde spravujete dokumenty, které slouží jako zdroj informací pro AI asistenta.
       AI bude odpovídat výhradně na základě obsahu těchto dokumentů.
@@ -31,8 +47,8 @@
     <div class="mb-4">
       <h3 class="text-lg font-semibold text-gray-800 mb-3">Nahrané dokumenty</h3>
 
-      <div v-if="documents.length === 0" class="text-gray-500 italic text-sm">
-        Žádné dokumenty nebyly nahrány.
+      <div v-if="documents.length === 0" class="text-gray-500 italic text-sm p-4 bg-gray-50 rounded border border-gray-200">
+        Žádné dokumenty nebyly nahrány. AI aktuálně používá pouze základní předvolené pokyny.
       </div>
 
       <div v-else class="overflow-x-auto">
