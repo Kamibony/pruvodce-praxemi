@@ -191,63 +191,8 @@ async function analyzeFile() {
     const rows = utils.sheet_to_json(worksheet, { header: 1 })
     log(`Načteno ${rows.length} řádků.`)
 
-    // --- BLOCK-CHUNKING LOGIC ---
-    let blocks = []
-    let currentBlock = null
-
-    for (let i = 0; i < rows.length; i++) {
-      const row = rows[i]
-      if (!row || row.length === 0) continue
-
-      // Detect Header Row
-      const schoolIdx = row.findIndex(cell => cell && String(cell).toLowerCase().includes('škola'))
-      const week1Idx = row.findIndex(cell => cell && (String(cell).includes('1. týden') || String(cell).includes('1. tyden')))
-
-      if (schoolIdx !== -1 && week1Idx !== -1) {
-        // Found a header!
-        if (currentBlock) {
-          blocks.push(currentBlock)
-        }
-
-        const weekColIndices = []
-        row.forEach((cell, idx) => {
-          if (cell && (String(cell).includes('týden') || String(cell).includes('tyden'))) {
-            weekColIndices.push(idx)
-          }
-        })
-
-        currentBlock = {
-          schoolParts: [],
-          rows: [],
-          schoolColIndex: schoolIdx,
-          weekColIndices: weekColIndices
-        }
-        continue // Skip the header row itself
-      }
-
-      // Process Content Row (if inside a block)
-      if (currentBlock) {
-         // 1. Check for School Name Part
-         const schoolCell = row[currentBlock.schoolColIndex]
-         if (schoolCell) {
-           const str = String(schoolCell).trim()
-           if (str.length > 2) {
-             currentBlock.schoolParts.push(str)
-           }
-         }
-         // 2. Add row to block
-         currentBlock.rows.push(row)
-      }
-    }
-
-    // Push the final block
-    if (currentBlock) {
-      blocks.push(currentBlock)
-    }
-
-    log(`Nalezeno ${blocks.length} bloků rozvrhu.`)
-
-    // Preparation for aggregation
+    // --- ROLLING FUZZY MATCH LOGIC ---
+    let activeSchoolId = 'nezarazeno'
     const studentAgg = new Map()
 
     // Create mapping for fuzzy search of schools
@@ -257,60 +202,108 @@ async function analyzeFile() {
       normalizedName: normalizeString(data.name)
     }))
 
-    // Process Blocks
-    for (const block of blocks) {
-       // Unified School Name
-       const rawSchoolName = block.schoolParts.join(' ').trim()
-       let schoolId = 'nezarazeno'
+    // Find Header Row Indices
+    let schoolColIndex = -1
+    let weekColIndices = []
+    let headerRowIndex = -1
 
-       if (rawSchoolName) {
-         const normalizedSchoolName = normalizeString(rawSchoolName)
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i]
+      if (!row || row.length === 0) continue
 
-         // Fuzzy match school (Same logic as before)
-         for (const school of schoolEntries) {
-           if (normalizedSchoolName.includes(school.normalizedName) ||
-               (school.normalizedName.length > 5 && normalizedSchoolName.includes(school.normalizedName.substring(0, 10)))) {
-             schoolId = school.id
-             break
-           }
-            // Significant word match
-           const schoolWords = school.normalizedName.split(/\s+/).filter(w => w.length > 3)
-           const ignored = ['stredni', 'skola', 'odborna', 'vyssi', 'sou', 'sos', 'gymnazium', 'prazska', 'praha', 'skoly']
-           const significantSchoolWords = schoolWords.filter(w => !ignored.includes(w))
+      const schoolIdx = row.findIndex(cell => cell && String(cell).toLowerCase().includes('škola'))
+      const week1Idx = row.findIndex(cell => cell && (String(cell).includes('1. týden') || String(cell).includes('1. tyden')))
 
-           if (significantSchoolWords.length > 0 && significantSchoolWords.some(w => normalizedSchoolName.includes(w))) {
-              schoolId = school.id
-              break
-           }
-         }
-       }
+      if (schoolIdx !== -1 && week1Idx !== -1) {
+        schoolColIndex = schoolIdx
+        headerRowIndex = i
 
-       // Iterate rows in block to find students
-       for (const row of block.rows) {
-         for (const colIdx of block.weekColIndices) {
-           const cellValue = row[colIdx]
+        // Find all week columns
+        row.forEach((cell, idx) => {
+          if (cell && (String(cell).includes('týden') || String(cell).includes('tyden'))) {
+            weekColIndices.push(idx)
+          }
+        })
+        log(`Hlavička nalezena na řádku ${i + 1}. Sloupec školy: ${schoolColIndex}, Týdny: ${weekColIndices.join(', ')}`)
+        break
+      }
+    }
 
-           if (isValidStudentCell(cellValue)) {
-             const name = String(cellValue).trim()
-             const normName = normalizeName(name)
+    if (headerRowIndex === -1) {
+      throw new Error('Nepodařilo se najít hlavičku tabulky (očekáváno "Škola" a "1. týden").')
+    }
 
-             if (!studentAgg.has(normName)) {
-               studentAgg.set(normName, {
-                 originalName: name,
-                 schoolId: schoolId,
-                 weeks: new Set()
-               })
+    // Iterate Rows (START AFTER HEADER)
+    for (let i = headerRowIndex + 1; i < rows.length; i++) {
+      const row = rows[i]
+      if (!row || row.length === 0) continue
+
+      // 1. UPDATE SCHOOL STATE (Rolling Match)
+      const schoolCell = row[schoolColIndex]
+      if (schoolCell) {
+        const rawSchoolName = String(schoolCell).trim()
+
+        // Only attempt match if text is significant (> 3 chars)
+        if (rawSchoolName.length > 3) {
+           const normalizedInput = normalizeString(rawSchoolName)
+           let foundMatchId = null
+
+           // Try to match against known schools
+           for (const school of schoolEntries) {
+             // Exact substring match
+             if (normalizedInput.includes(school.normalizedName) ||
+                 (school.normalizedName.length > 5 && normalizedInput.includes(school.normalizedName.substring(0, 10)))) {
+               foundMatchId = school.id
+               break
              }
 
-             const rec = studentAgg.get(normName)
-             rec.weeks.add(colIdx)
-             // Update schoolId if better one found (though usually consistent within block)
-             if (rec.schoolId === 'nezarazeno' && schoolId !== 'nezarazeno') {
-               rec.schoolId = schoolId
+             // Significant word match
+             const schoolWords = school.normalizedName.split(/\s+/).filter(w => w.length > 3)
+             const ignored = ['stredni', 'skola', 'odborna', 'vyssi', 'sou', 'sos', 'gymnazium', 'prazska', 'praha', 'skoly']
+             const significantSchoolWords = schoolWords.filter(w => !ignored.includes(w))
+
+             if (significantSchoolWords.length > 0 && significantSchoolWords.some(w => normalizedInput.includes(w))) {
+                foundMatchId = school.id
+                break
              }
            }
-         }
-       }
+
+           // CRITICAL: Only update state if a match was found!
+           if (foundMatchId) {
+             activeSchoolId = foundMatchId
+             // log(`Řádek ${i + 1}: Změna školy -> ${activeSchoolId} (${rawSchoolName})`)
+           } else {
+             // No match found -> Ignore fragment, keep previous activeSchoolId
+             // log(`Řádek ${i + 1}: Ignorován fragment -> "${rawSchoolName}" (Zůstává: ${activeSchoolId})`)
+           }
+        }
+      }
+
+      // 2. FIND STUDENTS
+      for (const colIdx of weekColIndices) {
+        const cellValue = row[colIdx]
+
+        if (isValidStudentCell(cellValue)) {
+          const name = String(cellValue).trim()
+          const normName = normalizeName(name)
+
+          if (!studentAgg.has(normName)) {
+            studentAgg.set(normName, {
+              originalName: name,
+              schoolId: activeSchoolId, // Assign CURRENT active school
+              weeks: new Set()
+            })
+          }
+
+          const rec = studentAgg.get(normName)
+          rec.weeks.add(colIdx)
+
+          // If we have a valid school now and the student was previously 'nezarazeno', update it
+          if (rec.schoolId === 'nezarazeno' && activeSchoolId !== 'nezarazeno') {
+            rec.schoolId = activeSchoolId
+          }
+        }
+      }
     }
 
     log(`Nalezeno ${studentAgg.size} unikátních jmen v rozvrhu.`)
