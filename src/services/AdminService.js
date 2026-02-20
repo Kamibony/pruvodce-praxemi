@@ -236,6 +236,45 @@ class AdminService {
       throw error;
     }
   }
+
+  // --- Import History Methods ---
+
+  /**
+   * Saves the metadata of the last successful import.
+   * @param {string} fileName - The name of the imported file.
+   * @returns {Promise<void>}
+   */
+  async saveImportHistory(fileName) {
+    if (!fileName) throw new Error("File name is required");
+    try {
+      const docRef = doc(db, 'system_settings', 'importHistory');
+      await setDoc(docRef, {
+        fileName: fileName,
+        importTimestamp: new Date().toISOString()
+      }, { merge: true });
+    } catch (error) {
+      console.error("Error saving import history:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Fetches the last import history metadata.
+   * @returns {Promise<Object|null>} Object containing fileName and importTimestamp, or null if not found.
+   */
+  async getImportHistory() {
+    try {
+      const docRef = doc(db, 'system_settings', 'importHistory');
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        return docSnap.data();
+      }
+      return null;
+    } catch (error) {
+      console.error("Error fetching import history:", error);
+      throw error;
+    }
+  }
 }
 
 export default new AdminService();

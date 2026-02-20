@@ -7,6 +7,18 @@
       <div class="mb-8 border-b pb-8">
         <h2 class="text-xl font-semibold mb-4 text-blue-800">1. Dynamický Import (Excel/CSV)</h2>
 
+        <!-- LAST IMPORT INFO -->
+        <div v-if="lastImportInfo" class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3">
+          <span class="text-2xl">✅</span>
+          <div>
+            <h3 class="font-bold text-green-800">Poslední aktualizace dat</h3>
+            <p class="text-sm text-green-700">
+              Proběhla: <strong>{{ formatDate(lastImportInfo.importTimestamp) }}</strong><br>
+              Ze souboru: <span class="font-mono bg-green-100 px-1 rounded">{{ lastImportInfo.fileName }}</span>
+            </p>
+          </div>
+        </div>
+
         <!-- INFO ALERT -->
         <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 text-sm text-blue-900">
           <p class="leading-relaxed">
@@ -98,7 +110,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { doc, writeBatch } from 'firebase/firestore'
 import { db } from '../firebase'
 import { schools, faq } from '../data/migrationData'
@@ -110,8 +122,21 @@ const logs = ref([])
 const parsedStudents = ref([])
 const unmatchedNames = ref([])
 const selectedFile = ref(null)
+const lastImportInfo = ref(null)
 
 const log = (msg) => logs.value.push(`> ${msg}`)
+
+onMounted(async () => {
+  lastImportInfo.value = await AdminService.getImportHistory()
+})
+
+function formatDate(isoString) {
+  if (!isoString) return ''
+  return new Date(isoString).toLocaleString('cs-CZ', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  })
+}
 
 // --- DYNAMIC IMPORT LOGIC ---
 
@@ -448,6 +473,16 @@ async function saveParsedData() {
 
     await batch.commit()
     log('✅ DATA BYLA ÚSPĚŠNĚ AKTUALIZOVÁNA!')
+
+    // Save Import Metadata
+    if (selectedFile.value) {
+      await AdminService.saveImportHistory(selectedFile.value.name)
+      lastImportInfo.value = {
+        fileName: selectedFile.value.name,
+        importTimestamp: new Date().toISOString()
+      }
+    }
+
     parsedStudents.value = []
     selectedFile.value = null
     unmatchedNames.value = []
