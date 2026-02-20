@@ -522,6 +522,7 @@ async function fixSchools() {
   log("Spouštím opravu škol...")
 
   const mapping = {
+    // Original list (maintained for completeness)
     "Pfeiferová Lenka": "jezdectvi",
     "Nováková Kristýna": "jezdectvi",
     "Stjepanovičová Barbara": "jezdectvi",
@@ -540,7 +541,16 @@ async function fixSchools() {
     "Cibulková Denisa": "gym_praha9",
     "Kozlová Nikola": "gym_praha9",
     "Hájek Borlová Alena": "gym_praha9",
-    "Ondráčková Nikol": "gym_praha9"
+    "Ondráčková Nikol": "gym_praha9",
+
+    // NEW ADDITIONS (Emergency Patch Extension)
+    "David Kec": "radotin",
+    "Josef Černý": "radotin",
+    "David Bašus": "radotin",
+    "Vladimír Preksl": "radotin",
+    "Pavla Kučerová": "podnikani_gastro",
+    "Karolína Křížková": "podnikani_gastro",
+    "Jakub Bednář": "podnikani_gastro"
   }
 
   try {
@@ -550,8 +560,19 @@ async function fixSchools() {
 
     for (const [name, targetSchoolId] of Object.entries(mapping)) {
         const normTarget = normalizeName(name)
-        // Find student by normalized name
-        const student = dbStudents.find(s => normalizeName(s.name) === normTarget)
+        const targetTokens = normTarget.split(/\s+/).filter(t => t.length > 0)
+
+        // Find student by normalized name (flexible order: First Last vs Last First, plus potential extra tokens in DB)
+        const student = dbStudents.find(s => {
+           const normDb = normalizeName(s.name)
+
+           // 1. Exact match
+           if (normDb === normTarget) return true
+
+           // 2. Flexible subset match (all target tokens must exist in DB name)
+           const dbTokens = normDb.split(/\s+/).filter(t => t.length > 0)
+           return targetTokens.every(token => dbTokens.includes(token))
+        })
 
         if (student) {
             // Check if update is needed
