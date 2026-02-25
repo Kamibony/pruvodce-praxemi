@@ -42,6 +42,26 @@ const loadData = async () => {
     console.error(e);
     error.value = "Nepodařilo se načíst data.";
   } finally {
+    try {
+      const { doc, setDoc } = await import('firebase/firestore');
+      const { db } = await import('../firebase');
+
+      await setDoc(doc(db, 'schools', 'zus_steti'), {
+        name: "ZUŠ Štětí",
+        focus: "hudebník",
+        coord: "Neznámý"
+      }, { merge: true });
+
+      await setDoc(doc(db, 'schools', 'sos_kopidlno'), {
+        name: "SOŠ zahradnická Kopidlno",
+        focus: "zahradník",
+        coord: "Neznámý"
+      }, { merge: true });
+
+      console.log("Missing schools added to DB!");
+    } catch (e) {
+      console.error("Patch failed", e);
+    }
     loading.value = false;
   }
 };
